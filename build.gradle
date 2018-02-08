@@ -1,0 +1,218 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.1.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath 'com.commercehub:gatling-gradle-plugin:2.0'
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2.1"
+		classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
+	}
+}
+
+ext {
+	SCALA_VERSION = "2.11.7"
+	GATLING_VERSION = "2.2.3"
+}
+
+apply plugin: "org.sonarqube"
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+apply plugin: "jacoco"
+
+apply plugin: 'scala'
+apply plugin: 'gatling'
+
+jacoco {
+    toolVersion = "0.7.6.201602180812"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        csv.enabled = true
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+String serviceName
+String serviceVersion
+String sharedAccountNumber
+
+jar {
+	doFirst{
+		baseName = serviceName
+		version = serviceVersion
+	}
+}
+
+
+
+
+sonarqube {
+	   properties {
+				        property 'sonar.projectName', serviceName
+		   				property 'sonar.projectVersion', serviceVersion
+		    }
+	}
+
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+sourceSets {
+	acceptanceTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/acceptance-test/java')
+		}
+		resources.srcDir file('src/acceptance-test/resources')
+	}
+}
+
+sourceSets {
+	loadTest {
+		scala {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/load-test/scala')
+		}
+		resources.srcDir file('src/load-test/resources')
+	}
+}
+
+configurations {
+	acceptanceTestCompile.extendsFrom testCompile
+	acceptanceTestRuntime.extendsFrom testRuntime
+}
+
+configurations {
+	loadTestCompile.extendsFrom testCompile
+	loadTestRuntime.extendsFrom testRuntime
+}
+
+gatling {
+	checkForKOs = true
+	koThreshold = 0
+
+	metrics {
+		graphiteUrl = "http://my.graphite.server.com"
+		metricPrefix = 'my-namespace'
+	}
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile "io.springfox:springfox-swagger2:2.6.1" //rest api description
+	compile 'io.springfox:springfox-swagger-ui:2.6.1' //rest api description ui
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('info.cukes:cucumber-java:1.2.5') //to use cucumber
+	testCompile('info.cukes:cucumber-junit:1.2.5') //to run in junit via the ide
+	testCompile('info.cukes:cucumber-spring:1.2.5') //to use dependency injection
+	acceptanceTestCompile('org.springframework:spring-tx:4.3.6.RELEASE') //to run acceptance tests from feature file in IDE
+	compile "org.scala-lang:scala-library:${SCALA_VERSION}"
+	loadTestCompile "io.gatling:gatling-http:${GATLING_VERSION}"
+	loadTestCompile "io.gatling:gatling-core:${GATLING_VERSION}"
+	loadTestCompile "io.gatling.highcharts:gatling-charts-highcharts:${GATLING_VERSION}"
+	testCompile "io.gatling:gatling-app:${GATLING_VERSION}"
+}
+
+task version {
+
+def dataList = [:]
+def configFileName = "src/main/resources/service-config"
+
+File configFile = new File(configFileName)
+
+def words
+def key
+def value
+
+assert file(configFile).exists()
+
+
+ configFile.eachLine { line ->
+
+ if (line.trim().size() == 0) {
+	 serviceVersion = "application"
+	 serviceName = "shopdirect"
+	 println "File does not exist"
+
+ } else {
+
+  words = line.split("=")
+  key=words[0]
+  value=words[1]
+  dataList[key]=value
+
+  }
+
+ serviceVersion = dataList.get("ServiceVersion")
+ serviceName = dataList.get("ServiceName")
+ sharedAccountNumber = dataList.get("SharedAccountNumber")
+}
+
+}
+
+task acceptanceTest(type: Test) {
+	testClassesDir = sourceSets.acceptanceTest.output.classesDir
+	classpath = sourceSets.acceptanceTest.runtimeClasspath
+	outputs.upToDateWhen { false }
+}
+
+tasks.withType(Test) {
+	reports.html.destination = file("${reporting.baseDir}/${name}")
+}
+
+import com.commercehub.gradle.plugin.GatlingTask
+
+task loadTest(type: GatlingTask, dependsOn: ['loadTestClasses']) {
+	sourceSet = sourceSets.loadTest
+	gatlingSimulation = 'MyGatlingTest'
+	jvmOptions {
+		minHeapSize = "1024m"
+		maxHeapSize = "1024m"
+		systemProperty 'gatling.execution.type', 'full'
+	}
+}
+
+apply plugin: "application"
+apply plugin: "jacoco"
+
+jacoco {
+    applyTo run
+}
+
+task applicationCodeCoverageReport(type:JacocoReport){
+    executionData run
+    sourceSets sourceSets.main
+}
+
+task clientJar(type: Jar) {
+
+	from(sourceSets.main.output) {
+		include "**/rest/model/**"
+	}
+	archiveName = serviceName + '-' + serviceVersion + '-client.jar'
+	includeEmptyDirs = false
+}
+
+task s3UploadClientJar(type: com.github.skhatri.s3aws.plugin.S3UploadTask) {
+	bucket='client-jar.' + sharedAccountNumber + '.lsdg.com'
+	awsProfile = 'default'
+	key = serviceName + '-' + serviceVersion + '-client.jar'
+	file = 'build/libs/' + serviceName + '-' + serviceVersion + '-client.jar'
+	link = 'latest/' + serviceName + '-client.jar'
+}

@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "__inputs": [
+      {
+        "name": "microservice-template"
+      }
+    ]
+  }
+}

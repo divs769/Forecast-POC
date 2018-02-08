@@ -1,0 +1,2 @@
+InternalLBSecurityGroup=sg-211cc35a
+ExternalLBSecurityGroup=sg-7f19c604

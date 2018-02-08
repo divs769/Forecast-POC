@@ -1,0 +1,9 @@
+ServiceName=servicestackinitunittest
+ExposedPort=80
+InternetFacing=true
+ClusterName=microservices
+ContainerPort=8080
+DockerImage=669711333016.dkr.ecr.eu-west-1.amazonaws.com/microservice-template:latest
+ServiceRole=ecsServiceRole
+NumberOfTasks=2
+DeployedEnvironments=dev

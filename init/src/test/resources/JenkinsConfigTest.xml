@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.14">
+    <actions/>
+    <description>Microservice Template</description>
+    <displayName>Microservice Template</displayName>
+    <properties>
+</org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject>

@@ -1,0 +1,8 @@
+DEVRoleToAssumeARN=arn:aws:iam::669711333016:role/deployToDEVRole
+UATRoleToAssumeARN=arn:aws:iam::884455016933:role/deployToUATRole
+NFTRoleToAssumeARN=arn:aws:iam::272824170876:role/deployToNFTRole
+PRDRoleToAssumeARN=arn:aws:iam::542406236671:role/deployToPRDRole
+DEVExternalId=0111111
+UATExternalId=0222222
+NFTExternalId=0333333
+PRDExternalId=0444444

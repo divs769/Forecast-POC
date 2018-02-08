@@ -1,0 +1,27 @@
+file:
+    namesPath: names.txt
+    versionPath: service-config
+
+logging:
+  file: build/app.log
+  level: info
+
+springfox:
+   documentation:
+       swagger:
+          v2:
+             path: /swagger.json
+
+endpoints:
+  enabled: false
+  health:
+    enabled: true
+  info:
+    enabled: true
+
+spring:
+    jackson:
+        serialization:
+            INDENT_OUTPUT: true
+info:
+    config: NFT
