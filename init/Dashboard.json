@@ -120,7 +120,7 @@
           },
           "targets": [
             {
-              "expr": "ecs_service_running_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_running_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "legendFormat": "Running Task",
               "metric": "",
@@ -202,7 +202,7 @@
           },
           "targets": [
             {
-              "expr": "ecs_service_pending_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_pending_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "legendFormat": "",
               "metric": "",
@@ -278,7 +278,7 @@
           },
           "targets": [
             {
-              "expr": "ecs_service_desired_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_desired_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "refId": "A",
               "step": 40
@@ -490,21 +490,21 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "ecs_service_running_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_running_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "legendFormat": "Running",
               "refId": "A",
               "step": 4
             },
             {
-              "expr": "ecs_service_desired_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_desired_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "legendFormat": "Desired",
               "refId": "B",
               "step": 4
             },
             {
-              "expr": "ecs_service_pending_tasks{service=\"microservice-template\"}",
+              "expr": "ecs_service_pending_tasks{service=\"forecast-poc\"}",
               "intervalFactor": 2,
               "legendFormat": "Pending",
               "refId": "C",
@@ -514,7 +514,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Microservice Template - Tasks",
+          "title": "Forecast Poc - Tasks",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -942,7 +942,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Microservice Template",
+  "title": "Forecast Poc",
   "version": 1
 }
 }

@@ -1,4 +1,4 @@
-package com.shopdirect.microservicetemplate.infrastructure.rest.model;
+package com.shopdirect.forecastpoc.infrastructure.rest.model;
 
 public class GreetingModel {
 

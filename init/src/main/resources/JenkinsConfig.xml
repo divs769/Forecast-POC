@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.14">
   <actions/>
-  <description>Microservice Template</description>
-  <displayName>Microservice Template</displayName>
+  <description>Forecast Poc</description>
+  <displayName>Forecast Poc</displayName>
   <properties>
     <org.jenkinsci.plugins.pipeline.modeldefinition.config.FolderConfig plugin="pipeline-model-definition@1.1.1">
       <dockerLabel></dockerLabel>
@@ -36,7 +36,7 @@
       <jenkins.branch.BranchSource>
         <source class="jenkins.plugins.git.GitSCMSource" plugin="git@3.1.0">
           <id>ec831c19-f26e-48b0-98be-9f004258489e</id>
-          <remote>git@bitbucket.org:ShopDirect/microservice-template.git</remote>
+          <remote>git@bitbucket.org:ShopDirect/forecast-poc.git</remote>
           <credentialsId>microservice</credentialsId>
           <remoteName>origin</remoteName>
           <rawRefSpecs>+refs/heads/*:refs/remotes/origin/*</rawRefSpecs>

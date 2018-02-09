@@ -154,36 +154,6 @@ pipeline {
            }
     }
 
-    stage('DeployToUAT') {
-          agent any
-          when {
-             branch 'master'
-          }
-          steps {
-              deployApplication("UAT", UATRoleToAssumeARN, UATExternalId)
-          }
-    }
-
-     stage('DeployToNFT') {
-              agent any
-              when {
-                 branch 'master'
-              }
-              steps {
-                  deployApplication("NFT", NFTRoleToAssumeARN, NFTExternalId)
-              }
-     }
-
-     stage('DeployToPRD') {
-               agent any
-               when {
-                  branch 'master'
-               }
-               steps {
-                   deployApplication("PRD", PRDRoleToAssumeARN, PRDExternalId)
-               }
-     }
-
     stage('Post Deploy : Version Update'){
                 agent any
                 when {

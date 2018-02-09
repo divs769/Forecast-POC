@@ -1,4 +1,4 @@
-# Microservice Template #
+# Forecast Poc #
 
 This service will be used to demonstrate how the continuous integration pipeline works for new hires. The service itself will store a list of names in a text file, which can be accessed through a REST API to return a number based on a parameter.
 

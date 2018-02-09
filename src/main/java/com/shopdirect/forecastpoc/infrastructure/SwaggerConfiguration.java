@@ -1,4 +1,4 @@
-package com.shopdirect.microservicetemplate.infrastructure;
+package com.shopdirect.forecastpoc.infrastructure;
 import com.google.common.base.Predicate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +21,6 @@ public class SwaggerConfiguration {
     }
 
     private Predicate<RequestHandler> selectors() {
-        return RequestHandlerSelectors.basePackage("com.shopdirect.microservicetemplate");
+        return RequestHandlerSelectors.basePackage("com.shopdirect.forecastpoc");
     }
 }
