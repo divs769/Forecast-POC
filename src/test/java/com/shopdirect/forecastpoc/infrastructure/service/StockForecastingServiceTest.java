@@ -1,9 +1,9 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
-import com.shopdirect.forecastpoc.infrastructure.dao.StockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.repository.ProductRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,11 +25,11 @@ public class StockForecastingServiceTest {
     private StockForecastingService stockForecastingService;
 
     @Mock
-    private StockDao stockDao;
+    private ProductRepository repository;
 
     @Before
     public void setUp() throws Exception {
-        stockForecastingService = new StockForecastingService(stockDao);
+        stockForecastingService = new StockForecastingService(repository);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class StockForecastingServiceTest {
         ProductStockData prod7 = new ProductStockData(initialDate.plusDays(42), 70);
         ProductStockData prod8 = new ProductStockData(initialDate.plusDays(49), 80);
 
-        when(stockDao.getProductStockData()).thenReturn(Arrays.asList(
+        when(repository.findAll()).thenReturn(Arrays.asList(
                 prod1, prod2, prod3, prod4, prod5, prod6, prod7, prod8
         ));
 
