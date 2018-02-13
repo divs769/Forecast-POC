@@ -2,16 +2,13 @@ package com.shopdirect.forecastpoc.infrastructure.service;
 
 import com.shopdirect.forecastpoc.infrastructure.dao.StockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
-import com.shopdirect.forecastpoc.infrastructure.model.PastForecastingResult;
+import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,56 +24,74 @@ public class StockForecastingService {
         this.stockDao = stockDao;
     }
 
-    public PastForecastingResult getPastForecasting(int numWeeks){
-        List<ProductStockData> fullProductStockData = stockDao.getProductStockData();
+    public ForecastingResult getForecastings(int numWeeks){
+        List<ProductStockData> fullProductStockData = stockDao.getProductStockData().stream()
+                .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
 
-        Map<LocalDate, ProductStockData> actualValues = getLastNProductStocks(numWeeks, fullProductStockData)
-                .collect(toMap(ProductStockData::getDate, prod -> prod));
-        Stream<ProductStockData> historicData = removeLastNDates(numWeeks, fullProductStockData);
-        Stream<LocalDate> dates = getLastNDates(numWeeks, fullProductStockData);
-        List<ProductStockData> naivePredictions = StockForecastingModels.naivePrediction(historicData, dates)
+        List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData);
+        List<LocalDate> nextDates = getNextWeekDates(numWeeks, fullProductStockData.get(fullProductStockData.size() - 1))
                 .collect(Collectors.toList());
-        Double naiveError = calculateError(naivePredictions, actualValues);
+        Stream<ProductStockData> naivePredictions = StockForecastingModels.naivePrediction(fullProductStockData.stream(),
+                nextDates.stream());
+        int indexNaive = forecastings.get(0).getName().equals("naive") ? 0 : 1;
+        forecastings.get(indexNaive).getForecastedValues().addAll(naivePredictions.collect(Collectors.toList()));
 
-        historicData = removeLastNDates(numWeeks, fullProductStockData);
-        dates = getLastNDates(numWeeks, fullProductStockData);
-        List<ProductStockData> averagePredictions = StockForecastingModels.averagePrediction(historicData, dates)
-                .collect(Collectors.toList());
-        Double averageError = calculateError(averagePredictions, actualValues);
+        Stream<ProductStockData> averagePredictions = StockForecastingModels.averagePrediction(fullProductStockData.stream(),
+                nextDates.stream());
+        forecastings.get(Math.abs(indexNaive - 1)).getForecastedValues().addAll(averagePredictions.collect(Collectors.toList()));
 
-        List<ForecastingModelResult> forecastings = Stream.of(new ForecastingModelResult(naivePredictions, naiveError, "naive"),
-                new ForecastingModelResult(averagePredictions, averageError, "average"))
+        return new ForecastingResult(forecastings, fullProductStockData);
+    }
+
+    /*
+    -should get past forecasting values from a db in the future
+    -For now, it recalculates the whole forecasting history
+    */
+    private List<List<ProductStockData>> getPastForecastings(List<ProductStockData> fullProductStockData){
+        Stream<ProductStockData> naiveForecastings = Stream.of();
+        Stream<ProductStockData> averageForecastings = Stream.of();
+        Stream<ProductStockData> naiveForecasting, averageForecasting;
+        for(int i = 1; i < fullProductStockData.size(); i++){
+            LocalDate date = fullProductStockData.get(i).getDate();
+            naiveForecasting = StockForecastingModels.naivePrediction(fullProductStockData.stream().limit(i),
+                    Stream.of(date));
+            naiveForecastings = Stream.concat(naiveForecastings, naiveForecasting);
+
+            averageForecasting = StockForecastingModels.averagePrediction(fullProductStockData.stream().limit(i),
+                    Stream.of(date));
+            averageForecastings = Stream.concat(averageForecastings, averageForecasting);
+
+        }
+        return Arrays.asList(naiveForecastings.collect(Collectors.toList()),
+                averageForecastings.collect(Collectors.toList()));
+    }
+
+    public List<ForecastingModelResult> calculatePastForecastings(List<ProductStockData> fullProductStockData){
+        Map<LocalDate, ProductStockData> actualValues = fullProductStockData.stream().collect(toMap(ProductStockData::getDate, prod -> prod));
+
+        List<List<ProductStockData>> pastForecastings = getPastForecastings(fullProductStockData);
+        List<ProductStockData> naiveForecastings = pastForecastings.get(0);
+        List<ProductStockData> averageForecastings = pastForecastings.get(1);
+        Double naiveError = calculateError(naiveForecastings, actualValues);
+        Double averageError = calculateError(averageForecastings, actualValues);
+
+        return Stream.of(new ForecastingModelResult(naiveForecastings, naiveError, "naive"),
+                new ForecastingModelResult(averageForecastings, averageError, "average"))
                 .sorted(Comparator.comparing(ForecastingModelResult::getError)).collect(Collectors.toList());
-        List<ProductStockData> historicDataList = removeLastNDates(numWeeks, fullProductStockData).collect(Collectors.toList());
-        List<ProductStockData> actualValuesList = actualValues.values().stream()
-                .sorted(Comparator.comparing(ProductStockData::getDate))
-                .collect(Collectors.toList());
-        return new PastForecastingResult(forecastings, historicDataList, actualValuesList);
     }
 
-    private Stream<ProductStockData> getLastNProductStocks(int numWeeks, List<ProductStockData> fullProductStockData) {
-        return fullProductStockData.stream()
-                .sorted(Comparator.comparing(ProductStockData::getDate))
-                .skip(Math.max(0, fullProductStockData.size() - numWeeks));
-    }
-
-    private Stream<LocalDate> getLastNDates(int numWeeks, List<ProductStockData> fullProductStockData) {
-        return getLastNProductStocks(numWeeks, fullProductStockData)
-                    .map(ps -> ps.getDate());
-    }
-
-    private Stream<ProductStockData> removeLastNDates(int numWeeks, List<ProductStockData> fullProductStockData) {
-        return fullProductStockData.stream()
-                    .sorted(Comparator.comparing(ProductStockData::getDate))
-                    .limit(Math.max(0, fullProductStockData.size() - numWeeks));
+    private static Stream<LocalDate> getNextWeekDates(int numberWeeks, ProductStockData lastStockData){
+        return Stream
+                .iterate(lastStockData.getDate().plusDays(7),
+                        localDate -> localDate.plusDays(7))
+                .limit(numberWeeks);
     }
 
     private Double calculateError(List<ProductStockData> forecastedValues, Map<LocalDate, ProductStockData> actualValues){
         OptionalDouble error = forecastedValues.stream().map(prod ->
                 ((double) Math.abs(prod.getStockValue() - actualValues.get(prod.getDate()).getStockValue()))
                             / (1 + actualValues.get(prod.getDate()).getStockValue()))
-                .mapToDouble(elem -> elem
-                )
+                .mapToDouble(elem -> elem)
                 .average();
 
         return error.isPresent() ? 100 * error.getAsDouble() : null;
