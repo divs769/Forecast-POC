@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -15,41 +15,40 @@ import static java.util.stream.Collectors.toList;
 
 @RunWith(SpringRunner.class)
 public class StockForecastingModelsTest {
+    private LocalDate d1 = LocalDate.of(2018, Month.JANUARY, 06);
+    private LocalDate d2 = LocalDate.of(2018, Month.JANUARY, 13);
+    private LocalDate d3 = LocalDate.of(2018, Month.JANUARY, 20);
+    private LocalDate d4 = LocalDate.of(2018, Month.JANUARY, 27);
+    private LocalDate d5 = LocalDate.of(2017, Month.DECEMBER, 11);
+    private LocalDate d6 = LocalDate.of(2017, Month.DECEMBER, 18);
+    private LocalDate d7 = LocalDate.of(2017, Month.DECEMBER, 25);
+
     @Test
     public void testNaivePrediction(){
-        Date d1 = new GregorianCalendar(2017, 01, 06).getTime();
-        Date d2 = new GregorianCalendar(2017, 01, 13).getTime();
-        Date d3 = new GregorianCalendar(2017, 01, 20).getTime();
-        Date d4 = new GregorianCalendar(2017, 01, 27).getTime();
         Stream<ProductStockData> result = StockForecastingModels.naivePrediction(Stream.of(
-                new ProductStockData(new GregorianCalendar(2017, 01, 05).getTime(), 15),
-                new ProductStockData(new GregorianCalendar(2017, 01, 06).getTime(), 25),
-                new ProductStockData(new GregorianCalendar(2017, 01, 04).getTime(), 20)
+                new ProductStockData(d7, 15),
+                new ProductStockData(d5, 25),
+                new ProductStockData(d6, 20)
 
         ), Stream.of(d1, d2, d3, d4));
         List<ProductStockData> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
-        compareProductStock(new ProductStockData(d1, 25),
+        compareProductStock(new ProductStockData(d1, 15),
                 productStockData.get(0));
-        compareProductStock(new ProductStockData(d2, 25),
+        compareProductStock(new ProductStockData(d2, 15),
                 productStockData.get(1));
-        compareProductStock(new ProductStockData(d3, 25),
+        compareProductStock(new ProductStockData(d3, 15),
                 productStockData.get(2));
-        compareProductStock(new ProductStockData(d4, 25),
+        compareProductStock(new ProductStockData(d4, 15),
                 productStockData.get(3));
     }
 
     @Test
     public void testIntResultAverage(){
-        Date d1 = new GregorianCalendar(2017, 01, 06).getTime();
-        Date d2 = new GregorianCalendar(2017, 01, 13).getTime();
-        Date d3 = new GregorianCalendar(2017, 01, 20).getTime();
-        Date d4 = new GregorianCalendar(2017, 01, 27).getTime();
-
         Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(new GregorianCalendar(2017, 01, 05).getTime(), 15),
-                new ProductStockData(new GregorianCalendar(2017, 01, 03).getTime(), 25),
-                new ProductStockData(new GregorianCalendar(2017, 01, 04).getTime(), 20)
+                new ProductStockData(d5, 15),
+                new ProductStockData(d7, 25),
+                new ProductStockData(d6, 20)
 
         ), Stream.of(d1, d2, d3, d4));
 
@@ -67,15 +66,10 @@ public class StockForecastingModelsTest {
 
     @Test
     public void testLowerRoundingAverage(){
-        Date d1 = new GregorianCalendar(2017, 01, 06).getTime();
-        Date d2 = new GregorianCalendar(2017, 01, 13).getTime();
-        Date d3 = new GregorianCalendar(2017, 01, 20).getTime();
-        Date d4 = new GregorianCalendar(2017, 01, 27).getTime();
-
         Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(new GregorianCalendar(2017, 01, 05).getTime(), 10),
-                new ProductStockData(new GregorianCalendar(2017, 01, 03).getTime(), 10),
-                new ProductStockData(new GregorianCalendar(2017, 01, 04).getTime(), 20)
+                new ProductStockData(d7, 10),
+                new ProductStockData(d6, 10),
+                new ProductStockData(d5, 20)
 
         ), Stream.of(d1, d2, d3, d4));
 
@@ -93,15 +87,10 @@ public class StockForecastingModelsTest {
 
     @Test
     public void testUpperRoundingAverage(){
-        Date d1 = new GregorianCalendar(2017, 01, 06).getTime();
-        Date d2 = new GregorianCalendar(2017, 01, 13).getTime();
-        Date d3 = new GregorianCalendar(2017, 01, 20).getTime();
-        Date d4 = new GregorianCalendar(2017, 01, 27).getTime();
-
         Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(new GregorianCalendar(2017, 01, 05).getTime(), 11),
-                new ProductStockData(new GregorianCalendar(2017, 01, 03).getTime(), 10),
-                new ProductStockData(new GregorianCalendar(2017, 01, 04).getTime(), 20)
+                new ProductStockData(d7, 11),
+                new ProductStockData(d5, 10),
+                new ProductStockData(d6, 20)
 
         ), Stream.of(d1, d2, d3, d4));
 
