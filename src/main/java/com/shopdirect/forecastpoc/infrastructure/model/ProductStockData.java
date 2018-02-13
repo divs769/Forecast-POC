@@ -1,17 +1,17 @@
 package com.shopdirect.forecastpoc.infrastructure.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class ProductStockData {
-    private Date date;
+    private LocalDate date;
     private long stockValue;
 
-    public ProductStockData(Date date, long stockValue) {
+    public ProductStockData(LocalDate date, long stockValue) {
         this.date = date;
         this.stockValue = stockValue;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
