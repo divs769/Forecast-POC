@@ -1,4 +1,4 @@
-package com.shopdirect.forecastpoc.infrastructure;
+package com.shopdirect.forecastpoc.infrastructure.config;
 import com.google.common.base.Predicate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
