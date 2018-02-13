@@ -1,9 +1,10 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
-import com.shopdirect.forecastpoc.infrastructure.dao.StockDao;
+import com.google.common.collect.Lists;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.PastForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +21,15 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class StockForecastingService {
 
-    private final StockDao stockDao;
+    private final ProductRepository repository;
 
     @Autowired
-    public StockForecastingService(StockDao stockDao) {
-        this.stockDao = stockDao;
+    public StockForecastingService(ProductRepository repository) {
+        this.repository = repository;
     }
 
-    public PastForecastingResult getPastForecasting(int numWeeks){
-        List<ProductStockData> fullProductStockData = stockDao.getProductStockData();
+    public PastForecastingResult getPastForecasting(int numWeeks) {
+        List<ProductStockData> fullProductStockData = Lists.newArrayList(repository.findAll());
 
         Map<LocalDate, ProductStockData> actualValues = getLastNProductStocks(numWeeks, fullProductStockData)
                 .collect(toMap(ProductStockData::getDate, prod -> prod));

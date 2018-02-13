@@ -1,9 +1,9 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
-import com.shopdirect.forecastpoc.infrastructure.dao.StockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.PastForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.repository.ProductRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,18 +25,18 @@ public class StockForecastingServiceTest {
     private StockForecastingService stockForecastingService;
 
     @Mock
-    private StockDao stockDao;
+    private ProductRepository repository;
 
     @Before
     public void setUp() throws Exception {
-        stockForecastingService = new StockForecastingService(stockDao);
+        stockForecastingService = new StockForecastingService(repository);
     }
 
     @Test
     public void testPastPredictionsForBestModel() {
         LocalDate d1 = LocalDate.of(2018, Month.JANUARY, 22);
         LocalDate d2 = LocalDate.of(2018, Month.JANUARY, 29);
-        LocalDate d3 = LocalDate.of(2018, Month.FEBRUARY, 05);
+        LocalDate d3 = LocalDate.of(2018, Month.FEBRUARY, 5);
         LocalDate d4 = LocalDate.of(2018, Month.FEBRUARY, 12);
         LocalDate d5 = LocalDate.of(2017, Month.DECEMBER, 25);
         LocalDate d6 = LocalDate.of(2018, Month.JANUARY, 1);
@@ -51,7 +51,7 @@ public class StockForecastingServiceTest {
         ProductStockData prod6 = new ProductStockData(d6, 20);
         ProductStockData prod7 = new ProductStockData(d7, 30);
         ProductStockData prod8 = new ProductStockData(d8, 40);
-        when(stockDao.getProductStockData()).thenReturn(Arrays.asList(
+        when(repository.findAll()).thenReturn(Arrays.asList(
                 prod5, prod6, prod7, prod8, prod1, prod2, prod3, prod4
         ));
 
