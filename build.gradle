@@ -135,6 +135,7 @@ dependencies {
 	}
 	acceptanceTestCompile "com.amazonaws:DynamoDBLocal:[1.11,2.0)"
 	acceptanceTestCompile "com.almworks.sqlite4java:sqlite4java:1.0.392"
+	compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4"
 }
 
 task version {

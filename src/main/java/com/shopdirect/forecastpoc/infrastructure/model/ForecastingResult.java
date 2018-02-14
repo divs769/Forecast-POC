@@ -13,6 +13,8 @@ public class ForecastingResult {
         this.historicData = historicData;
     }
 
+    public ForecastingResult() {}
+
     public List<ForecastingModelResult> getForecastings() {
         return forecastings;
     }

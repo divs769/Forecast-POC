@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
+@RequestMapping("/forecast")
 public class ForecastResource {
 
     private final StockForecastingService service;

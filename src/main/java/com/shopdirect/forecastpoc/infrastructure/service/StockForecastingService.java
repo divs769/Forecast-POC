@@ -1,6 +1,7 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
 import com.google.common.collect.Lists;
+import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
@@ -18,15 +19,15 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class StockForecastingService {
 
-    private final ProductRepository repository;
+    private final ProductStockDao productStockDao;
 
     @Autowired
-    public StockForecastingService(ProductRepository repository) {
-        this.repository = repository;
+    public StockForecastingService(ProductStockDao productStockDao) {
+        this.productStockDao = productStockDao;
     }
 
     public ForecastingResult getForecastings(int numWeeks){
-        List<ProductStockData> fullProductStockData =  Lists.newArrayList(repository.findAll()).stream()
+        List<ProductStockData> fullProductStockData =  Lists.newArrayList(productStockDao.getAll()).stream()
                 .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
 
         List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData);
