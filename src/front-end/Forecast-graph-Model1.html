@@ -1,0 +1,376 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+  <script src="highcharts.js"></script>
+  <script src="https://code.highcharts.com/highcharts-more.js"></script>
+
+  <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+
+  <script src="http://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+          crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+          crossorigin="anonymous"></script>
+
+  <script src="dataservice.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css" type="text/css"/>
+  <script type="text/javascript">
+   $(document).ready(function() {
+       $('#multiselect').multiselect({
+           buttonWidth: '400px'
+       });
+   });
+  </script>
+</head>
+
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <div>
+        <select id="modelSelect" class="form-control" multiple="multiple">
+
+        </select>
+        <a href="#" id="refreshBtn" class="btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-refresh"></span> Refresh
+        </a>
+      </div>
+
+      <div id="container"></div>
+    </div>
+  </div>
+  <div class="row align-items-center">
+
+    <div class="col">
+
+      <div class="pre-scrollable">
+        <table class="table table-hover">
+          <thead class="thead-light">
+          <tr>
+            <th colspan="2" class="text-center">
+              <b>Historic Data- Sales</b>
+            </th>
+          </tr>
+          <tr>
+            <th>Month/Year</th>
+            <th>Total Sales</th>
+          </tr>
+          </thead>
+          <tr>
+            <td>Jan 2017</td>
+            <td>3.9</td>
+          </tr>
+          <tr>
+            <td>Feb 2017</td>
+            <td>4.2</td>
+          </tr>
+          <tr>
+            <td>Mar 2017</td>
+            <td>5.7</td>
+          </tr>
+          <tr>
+            <td>Apr 2017</td>
+            <td>8.5</td>
+          </tr>
+          <tr>
+            <td>May 2017</td>
+            <td>11.9</td>
+          </tr>
+          <tr>
+            <td>Jun 2017</td>
+            <td>15.2</td>
+          </tr>
+          <tr>
+            <td>Jul 2017</td>
+            <td>17</td>
+          </tr>
+          <tr>
+            <td>Aug 2017</td>
+            <td>16.6</td>
+          </tr>
+          <tr>
+            <td>Sep 2017</td>
+            <td>14.2</td>
+          </tr>
+          <tr>
+            <td>Oct 2017</td>
+            <td>10.3</td>
+          </tr>
+          <tr>
+            <td>Nov 2017</td>
+            <td>6.6</td>
+          </tr>
+          <tr>
+            <td>Dec 2017</td>
+            <td>4.8</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="pre-scrollable">
+        <table class="table table-hover">
+          <thead class="table-info">
+          <tr>
+            <th class="thead-dark text-center" colspan="2">
+              <b>Forecast Data - Demand </b>
+            </th>
+          </tr>
+          <tr>
+            <th>Month/Year</th>
+            <th>Total Demand</th>
+          </tr>
+          </thead>
+          <tr>
+            <td>Jan 2018</td>
+            <td>7</td>
+          </tr>
+          <tr>
+            <td>Feb 2018</td>
+            <td>6.9</td>
+          </tr>
+          <tr>
+            <td>Mar 2018</td>
+            <td>9.5</td>
+          </tr>
+          <tr>
+            <td>Apr 2018</td>
+            <td>14.5</td>
+          </tr>
+          <tr>
+            <td>May 2018</td>
+            <td>18.4</td>
+          </tr>
+          <tr>
+            <td>Jun 2018</td>
+            <td>21.5</td>
+          </tr>
+          <tr>
+            <td>Jul 2018</td>
+            <td>25.2</td>
+          </tr>
+          <tr>
+            <td>Aug 2018</td>
+            <td>26.5</td>
+          </tr>
+          <tr>
+            <td>Sep 2018</td>
+            <td>23.3</td>
+          </tr>
+          <tr>
+            <td>Oct 2018</td>
+            <td>18.3</td>
+          </tr>
+          <tr>
+            <td>Nov 2018</td>
+            <td>13.9</td>
+          </tr>
+          <tr>
+            <td>Dec 2018</td>
+            <td>9.6</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="col align-self-center">
+
+      <div id="container-accuracy" style="width: 300px; height: 200px; float: center"></div>
+
+    </div>
+
+  </div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+    var availableModels = getAvailableModels();
+    var options = '';
+    for (i = 0; i < availableModels.length; i++) {
+      options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
+    }
+    $("#modelSelect").append(options);
+    $('#modelSelect').multiselect();
+
+    $("#refreshBtn").click(function(){
+      refreshGraph();
+      refreshTables();
+    });
+
+});
+
+function loadGraphData() {
+  var selectedIds = [];
+
+  $('#modelSelect :selected').each(function(i, selectedElement) {
+    selectedIds.push($(selectedElement).val());
+  });
+
+  models = getModel(selectedIds);
+  var series = []
+  for(i=0; i<models.length; i++){
+    console.log("Model data is ", models[i].values)
+    for (x=0; x < models[i].values.length; x++) {
+      series.push({name: models[i].values[x].name, data: models[i].values[x].data})
+    }
+  }
+  return series;
+}
+
+  var chart = new Highcharts.Chart({
+    chart: {
+      type: 'line',
+      renderTo: 'container'
+    },
+    title: {
+      text: 'Forecast Demand'
+    },
+    subtitle: {
+      text: 'Model 1'
+    },
+    xAxis: {
+      categories: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017']
+    },
+    yAxis: {
+      title: {
+        text: 'Stock'
+      }
+    },
+    plotOptions: {
+      series: {
+        cursor: 'pointer',
+        point: {
+          events: {
+            click: function (e) {
+              hs.htmlExpand(null, {
+                pageOrigin: {
+                  x: e.pageX || e.clientX,
+                  y: e.pageY || e.clientY
+                },
+                headingText: this.series.name,
+                maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                this.y + ' visits',
+                width: 200
+              });
+            }
+          }
+        },
+        marker: {
+          lineWidth: 1
+        }
+      }
+    },
+
+  });
+
+  function refreshGraph() {
+    var series = loadGraphData();
+    var seriesLength = chart.series.length;
+    for(var i = seriesLength - 1; i > -1; i--) {
+        chart.series[i].remove();
+    }
+    for (i = 0; i < series.length; i++){
+      console.log(series[i])
+      chart.addSeries(series[i])
+    }
+    chart.redraw();
+
+  }
+
+  function refreshTables(){
+
+  }
+
+  var gaugeOptions = {
+
+    chart: {
+        type: 'solidgauge'
+    },
+
+    title: null,
+
+    pane: {
+        center: ['50%', '85%'],
+        size: '140%',
+        startAngle: -90,
+        endAngle: 90,
+        background: {
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+            innerRadius: '60%',
+            outerRadius: '100%',
+            shape: 'arc'
+        }
+    },
+
+    tooltip: {
+        enabled: false
+    },
+
+    // the value axis
+    yAxis: {
+        stops: [
+            [0.9, '#DF5353'], // red
+            [0.5, '#DDDF0D'], // yellow
+            [0.1, '#55BF3B'], // green
+        ],
+        lineWidth: 0,
+        minorTickInterval: null,
+        tickAmount: 2,
+        title: {
+            y: -70
+        },
+        labels: {
+            y: 16
+        }
+    },
+
+    plotOptions: {
+        solidgauge: {
+            dataLabels: {
+                y: 5,
+                borderWidth: 0,
+                useHTML: true
+            }
+        }
+    }
+};
+  // The Accuracy gauge
+Highcharts.chart('container-accuracy', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: 0,
+        max: 100,
+        title: {
+            text: 'Accuracy'
+        }
+    },
+
+    credits: {
+        enabled: false
+    },
+
+    series: [{
+        name: 'Accuracy',
+        data: [83],
+        dataLabels: {
+            format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                   '<span style="font-size:12px;color:silver">%</span></div>'
+        },
+        tooltip: {
+            valueSuffix: ' %'
+        }
+    }]
+
+}));
+
+
+</script>
+
+</html>
