@@ -1,7 +1,7 @@
 
 var model1 = {
     id: "1",
-    name: "Model 1",
+    name: "naive",
     timeFrame: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017'],
     values: [
         {
@@ -18,7 +18,7 @@ var model1 = {
 
 var model2 = {
     id: "2",
-    name: "Model 2",
+    name: "average",
     timeFrame: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017'],
     values: [
                 {
@@ -34,12 +34,35 @@ var model2 = {
 };
 
 var modelData = [model1, model2];
+var forecastingList = [];
+var historyDataList = [];
+var modelList = [];
+$.ajax(
+    {
+        dataType: 'json',
+        headers: {
+            'X-Hello': 'World',
+            Accept:"application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        type:'GET',
+        url:'http://localhost:8080/forecast/4',
+        success: function(data)
+        {
+            console.log(modelList.length);
+            for (i = 0; i < data.forecastings.length; i++) { 
+                modelList.push({id: i+1, name: data.forecastings[i].name}); 
+            }
+            getAvailableModels()  ;
+            console.log(modelList.length);
+        },
+        error: function(data)
+        {
+            alert("error");
+        }
+    });
 
 function getAvailableModels(){
-    var modelList = [];
-    for (i = 0; i < modelData.length; i++) {
-        modelList.push({id: modelData[i].id, name: modelData[i].name});
-    }
     return modelList;
 } 
 
