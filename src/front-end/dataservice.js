@@ -74,9 +74,7 @@ function getAvailableModelDatas(){
     return modelData;
 }
 function getModel(id) {
-    console.log("modelData length is "+modelData.length);
     var modelDetailsList = [];
-    console.log(id);
     for (i = 0; i < modelData.length; i++) {
         for (x = 0; x < id.length; x++) {
             console.log("Comparing models ", modelData[i].id, id[x])
