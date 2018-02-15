@@ -16,7 +16,7 @@ var model2 = {
 };
 
 var modelData = [];
-var forecastingList = [];
+
 var historyDataList = [];
 var modelList = [];
 $.ajax(
@@ -34,6 +34,7 @@ $.ajax(
            
             for (i = 0; i < data.forecastings.length; i++) { 
                 modelList.push({id: i+1, name: data.forecastings[i].name}); 
+                var forecastingList = [];
                 var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
                     for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
                         forecastingList.push(data.forecastings[i].forecastedValues[x].stockValue);
