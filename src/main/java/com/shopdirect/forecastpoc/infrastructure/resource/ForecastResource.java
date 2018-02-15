@@ -4,6 +4,7 @@ import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,11 +25,13 @@ public class ForecastResource {
     }
 
     @RequestMapping(method = GET, path = "/{weeks}/{startDate}")
+    @CrossOrigin
     public ForecastingResult getForecastResult(@PathVariable int weeks, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
         return service.getForecastings(weeks, startDate);
     }
 
     @RequestMapping(method = GET, path = "/{weeks}")
+    @CrossOrigin
     public ForecastingResult getForecastResult(@PathVariable int weeks) {
         return service.getForecastings(weeks);
     }
