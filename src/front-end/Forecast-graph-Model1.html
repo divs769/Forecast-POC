@@ -192,39 +192,7 @@
 </body>
 
 <script type="text/javascript">
-  $(document).ready(function(){
-
-    var availableModels = getAvailableModels();
-    var options = '';
-    for (i = 0; i < availableModels.length; i++) {
-      options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
-    }
-    $("#modelSelect").append(options);
-    $('#modelSelect').multiselect();
-
-    $("#refreshBtn").click(function(){
-      refreshGraph();
-      refreshTables();
-    });
-
-});
-
-function loadGraphData() {
-  var selectedIds = [];
-
-  $('#modelSelect :selected').each(function(i, selectedElement) {
-    selectedIds.push($(selectedElement).val());
-  });
-
-  models = getModel(selectedIds);
-  var series = []
-  for(i=0; i<models.length; i++){      
-      series.push({name: models[i].name, data: models[i].values})
-  }
-  return series;
-}
-
-  var chart = new Highcharts.Chart({
+ var chart = new Highcharts.Chart({
     chart: {
       type: 'line',
       renderTo: 'container'
@@ -233,7 +201,7 @@ function loadGraphData() {
       text: 'Forecast Demand'
     },
     subtitle: {
-      text: 'Model 1'
+      text: 'POC'
     },
     xAxis: {
       categories: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017']
@@ -270,8 +238,50 @@ function loadGraphData() {
 
   });
 
-  function refreshGraph() {
-    var series = loadGraphData();
+   var series = [];
+  $(document).ready(function(){
+
+    var availableModels = getAvailableModels();
+    var options = '';
+    for (i = 0; i < availableModels.length; i++) {
+      options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
+    }
+    $("#modelSelect").append(options);
+    $('#modelSelect').multiselect();
+
+    var sales =getSalesData();
+    
+  
+    var availableModelaData = getAvailableModelDatas()
+    for(i=0;i<sales.length;i++){    
+      series.push({name: sales[i].name, data: sales[i].values})
+    }
+    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values})
+    refreshGraph(series);
+    $("#refreshBtn").click(function(){
+      loadGraphData(series);
+      refreshGraph(series);
+      refreshTables();
+    });
+  
+
+});
+function loadGraphData(series) {
+  var selectedIds = [];
+
+  $('#modelSelect :selected').each(function(i, selectedElement) {
+    selectedIds.push($(selectedElement).val());
+  });
+
+  models = getModel(selectedIds);
+ 
+  for(i=0; i<models.length; i++){      
+      series.push({name: models[i].name, data: models[i].values})
+  }
+  return series;
+}
+function refreshGraph(series) {
+    
     var seriesLength = chart.series.length;
     for(var i = seriesLength - 1; i > -1; i--) {
         chart.series[i].remove();
@@ -341,6 +351,10 @@ function loadGraphData() {
         }
     }
 };
+
+
+
+ 
   // The Accuracy gauge
 Highcharts.chart('container-accuracy', Highcharts.merge(gaugeOptions, {
     yAxis: {
