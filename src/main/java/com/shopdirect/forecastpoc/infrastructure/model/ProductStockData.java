@@ -41,6 +41,7 @@ public class ProductStockData {
         return lineNumber;
     }
 
+    // TODO: add JSON Property to constructor once we support multiple lines
     @JsonProperty("lineNumber")
     public void setLineNumber(String lineNumber) {
         this.lineNumber = lineNumber;

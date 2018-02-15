@@ -5,7 +5,8 @@ Feature: Get forecastings
         And multiple stock values have been inserted
 
     Scenario: The request has a positive number of weeks
-        Given the endpoint is called with a number of weeks greater than 0 passed as input
+        Given a payload with a number of weeks greater than 0
+        When the get endpoint is called
         Then the response is success
         And the result contains the historic data
         And the result contains one prediction for each model
