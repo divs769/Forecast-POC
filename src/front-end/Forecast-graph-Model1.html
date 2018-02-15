@@ -204,7 +204,10 @@
       text: 'POC'
     },
     xAxis: {
-      categories: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017']
+      type: 'datetime',
+      labels: {
+        format: '{value: %e %b %y}'
+      }
     },
     yAxis: {
       title: {
@@ -251,12 +254,12 @@
 
     var sales =getSalesData();
     
-  
     var availableModelaData = getAvailableModelDatas()
     for(i=0;i<sales.length;i++){    
       series.push({name: sales[i].name, data: sales[i].values})
     }
-    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values})
+    markBestModel(series, availableModelaData)
+
     refreshGraph(series);
     $("#refreshBtn").click(function(){
       loadGraphData(series);
@@ -266,19 +269,39 @@
   
 
 });
+
+function markBestModel(series, availableModelaData){
+  if(availableModelaData.length > 0){
+    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values});
+    $("ul.multiselect-container > li > a > label.checkbox > input[type='checkbox']").first().click();
+  }
+  
+}
+
 function loadGraphData(series) {
   var selectedIds = [];
 
   $('#modelSelect :selected').each(function(i, selectedElement) {
     selectedIds.push($(selectedElement).val());
   });
-
   models = getModel(selectedIds);
- 
-  for(i=0; i<models.length; i++){      
-      series.push({name: models[i].name, data: models[i].values})
+  for(i=series.length - 1; i > 0; i--){
+    if(!findElemArray(series[i], models)){
+      series.splice(i, 1);
+    }
+  }
+  for(i=0; i<models.length; i++){   
+      if(!findElemArray(models[i], series)){
+        series.push({name: models[i].name, data: models[i].values})
+      }
+      
   }
   return series;
+}
+function findElemArray(element, arr){
+  return arr.find(function(elem) {
+      return element.name == elem.name;
+    })
 }
 function refreshGraph(series) {
     

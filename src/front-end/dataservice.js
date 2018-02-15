@@ -31,22 +31,22 @@ $.ajax(
         url:'http://localhost:8080/forecast/4',
         success: function(data)
         {
-           
             for (i = 0; i < data.forecastings.length; i++) { 
                 modelList.push({id: i+1, name: data.forecastings[i].name}); 
                 var forecastingList = [];
                 var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
                     for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
-                        forecastingList.push(data.forecastings[i].forecastedValues[x].stockValue);
+                        forecastingList.push({x: getNewDate(data.forecastings[i].forecastedValues[x].date), 
+                            y: data.forecastings[i].forecastedValues[x].stockValue});
                     }
                 modelData.push({id: i+1, name: data.forecastings[i].name,
-                    accuracy:data.forecastings[i].error,
+                    accuracy: 100 - data.forecastings[i].error,
                     values:forecastingList
                });
             }
             var historyDataList = [];
             for(j=0;j<data.historicData.length;j++){
-                    historyDataList.push(data.historicData[j].stockValue);
+                    historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stockValue});
             }
             salesData.push({id: i+1, name: 'Sales Data',
                     values:historyDataList});
@@ -62,6 +62,11 @@ $.ajax(
     function getSalesData(){
         return salesData;
     }
+
+function getNewDate(date){
+    return new Date(date[0], date[1] - 1, date[2]);
+}
+
 function getAvailableModels(){
     return modelList;
 } 
