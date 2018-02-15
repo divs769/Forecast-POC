@@ -1,22 +1,14 @@
 package com.shopdirect.acceptancetest.forecasting;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.shopdirect.acceptancetest.LatestResponse;
-
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
-import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -30,27 +22,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class GetForecastingStepDef extends BaseForecastingStepDef {
-    public final String ENDPOINT = "http://localhost:8080/forecast";
+
     private List<ProductStockData> products;
+    private URI request;
 
     @Autowired
     public GetForecastingStepDef(RestTemplate restTemplate, LatestResponse latestResponse, @Qualifier("testClient") AmazonDynamoDB db) {
         super(restTemplate, latestResponse, db);
     }
 
-    @Given("^the database has been initialised and is running$")
-    public void theDatabaseHasBeenInitialised() throws Throwable {
-        TableDescription tableDescription = createTable(db).getDescription();
+    @Given("^a payload with a number of weeks greater than (\\d+)$")
+    public void aPayloadWithANumberOfWeeksGreaterThan(int arg0) throws Throwable {
+        request = UriComponentsBuilder.fromUriString(ENDPOINT).pathSegment("4").build().toUri();
     }
 
-    @Then("^the response is success$")
-    public void theResponseIsSuccess() throws Throwable {
-        assertEquals(HttpStatus.OK, latestResponse.getResponse().getStatusCode());
-    }
-
-    @Given("^the endpoint is called with a number of weeks greater than 0 passed as input$")
+    @Given("^the get endpoint is called$")
     public void theEndpointIsCalled() throws Throwable {
-        URI request = UriComponentsBuilder.fromUriString(ENDPOINT).pathSegment("4").build().toUri();
         latestResponse.setResponse(restTemplate.getForEntity(request, ForecastingResult.class));
     }
 
@@ -79,7 +66,7 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
                 new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 100)
         );
         for(ProductStockData product : products){
-            addUpdateItem(product);
+            addItem(product);
         }
     }
 
@@ -160,12 +147,5 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
         List<ForecastingModelResult> forecastingData = result.getForecastings();
         assertTrue(forecastingData.get(0).getError() <= forecastingData.get(1).getError());
-    }
-
-    @After
-    public void cleanupTable() throws Exception {
-        List<ProductStockData> scanResult = dynamoDBMapper.scan(ProductStockData.class, new DynamoDBScanExpression());
-        List<DynamoDBMapper.FailedBatch> failedBatchList = dynamoDBMapper.batchDelete(scanResult);
-        System.out.println("-----> FAILED BATCH: " + failedBatchList);
     }
 }
