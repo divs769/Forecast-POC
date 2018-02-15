@@ -218,11 +218,8 @@ function loadGraphData() {
 
   models = getModel(selectedIds);
   var series = []
-  for(i=0; i<models.length; i++){
-    console.log("Model data is ", models[i].values)
-    for (x=0; x < models[i].values.length; x++) {
-      series.push({name: models[i].values[x].name, data: models[i].values[x].data})
-    }
+  for(i=0; i<models.length; i++){      
+      series.push({name: models[i].name, data: models[i].values})
   }
   return series;
 }
