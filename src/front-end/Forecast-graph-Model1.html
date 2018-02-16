@@ -277,7 +277,7 @@ function refreshBtnFn(){
 
 function markBestModel(series, availableModelaData){
   if(availableModelaData.length > 0){
-    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values, accuracy: availableModelaData[0].accuracy});
+    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values, error: availableModelaData[0].error});
     $("ul.multiselect-container > li > a > label.checkbox > input[type='checkbox']").first().click();
   }
   
@@ -297,7 +297,7 @@ function loadGraphData(series) {
   }
   for(i=0; i<models.length; i++){   
       if(!findElemArray(models[i], series)){
-        series.push({name: models[i].name, data: models[i].values, accuracy: models[i].accuracy})
+        series.push({name: models[i].name, data: models[i].values, error: models[i].error})
       }
       
   }
@@ -319,14 +319,14 @@ function refreshGraph(series) {
       chart.addSeries(series[i])
     }
     chart.redraw();
-    updateAccuracyCharts(series)
+    updateErrorCharts(series)
   }
 
   function refreshTables(){
 
   }
 
-  function updateAccuracyCharts(series){
+  function updateErrorCharts(series){
     $("#containers > div").each(function(i, selectedElement) {
       if(!findElemArray(selectedElement.id, series)){
         selectedElement.remove();
@@ -337,41 +337,26 @@ function refreshGraph(series) {
       }).get();
     for(i = 1; i < series.length; i++){
       if(!findElemArray(series[i], ids)){
-        createAccuracyChart(series[i]);
+        createErrorChart(series[i]);
       }
     }
   }
 
-  function createAccuracyChart(model){
-       // The Accuracy gauge
-      $("#containers").append('<div id="'+model.name+'" style="width: 300px; height: 200px; float: center"></div>')
-      Highcharts.chart(model.name, Highcharts.merge(gaugeOptions, {
-          yAxis: {
-              min: 0,
-              max: 100,
-              title: {
-                  text: model.name + ' accuracy'
-              }
-          },
-
-          credits: {
-              enabled: false
-          },
-
-          series: [{
-              name: model.name +' accuracy',
-              data: [parseFloat(model.accuracy.toFixed(2))],
-              dataLabels: {
-                  format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-                      ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-                         '<span style="font-size:12px;color:silver">%</span></div>'
-              },
-              tooltip: {
-                  valueSuffix: ' %'
-              }
-          }]
-
-      }));
+  function createErrorChart(model){
+      var color;
+      if(model.error <= 30){
+        color = 'rgb(140, 227, 5)'; //green
+      }else if(model.error <= 60){
+        color = '#f7f75c'; //yellow
+      }else{
+        color = '#f75454'; //red
+      }
+       // The Error gauge
+      $("#containers").append('<div id="'+model.name+'" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">'+
+        '<div>' + model.name +' error </div>' +
+        '<div style="border-radius: 50%; width: 100px; height: 100px; background-color:'+color+';">' +
+          '<span style="position: relative; top: 37%;">' +model.error.toFixed(2)+"%" + '</span></div>' +
+      '</div>')
   }
 
   var gaugeOptions = {

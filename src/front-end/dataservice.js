@@ -41,7 +41,7 @@ function loadBackEndData(callback){
                             y: data.forecastings[i].forecastedValues[x].stockValue});
                     }
                 modelData.push({id: i+1, name: data.forecastings[i].name,
-                    accuracy: 100 - data.forecastings[i].error,
+                    error: data.forecastings[i].error,
                     values:forecastingList
                });
              
