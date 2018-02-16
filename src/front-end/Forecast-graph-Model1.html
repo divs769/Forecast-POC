@@ -261,19 +261,19 @@
     markBestModel(series, availableModelaData)
 
     refreshGraph(series);
-    $("#refreshBtn").click(function(){
-      loadGraphData(series);
-      refreshGraph(series);
-      refreshTables();
-    });
   
   });
-  $("#refreshBtn").click(function(){
+
+ refreshBtnFn();
+});
+
+function refreshBtnFn(){
+   $("#refreshBtn").click(function(){
       loadGraphData(series);
       refreshGraph(series);
       refreshTables();
     });
-});
+  }
 
 function markBestModel(series, availableModelaData){
   if(availableModelaData.length > 0){
