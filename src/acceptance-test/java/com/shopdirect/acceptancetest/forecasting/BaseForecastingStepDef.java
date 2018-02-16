@@ -19,6 +19,10 @@ import java.util.Arrays;
 import static com.shopdirect.acceptancetest.configuration.TestConfiguration.STOCK_DATA_TB;
 
 public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
+
+    protected static final String ENDPOINT = "http://localhost:8080/forecast";
+    protected static final String TABLE = "forecast_stock";
+
     protected RestTemplate restTemplate;
     protected LatestResponse latestResponse;
     protected DynamoDB db;
@@ -71,7 +75,7 @@ public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
                         .withWriteCapacityUnits(1L));
     }
 
-    protected void addUpdateItem(ProductStockData productStockData) {
+    protected void addItem(ProductStockData productStockData) {
         Table table = db.getTable(STOCK_DATA_TB);
         Item item = new Item()
                 .withString("lineNumber", productStockData.getLineNumber())
@@ -79,6 +83,4 @@ public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
                 .withLong("stock", productStockData.getStockValue());
         table.putItem(item);
     }
-
-
 }

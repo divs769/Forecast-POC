@@ -46,7 +46,7 @@
     </div>
   </div>
   <div class="row align-items-center">
-
+<!--
     <div class="col">
 
       <div class="pre-scrollable">
@@ -178,11 +178,11 @@
           </tr>
         </table>
       </div>
-    </div>
+    </div> -->
 
-    <div class="col align-self-center">
+    <div id="containers" class="col align-self-center" style="display: flex;">
 
-      <div id="container-accuracy" style="width: 300px; height: 200px; float: center"></div>
+      <!--<div id="container-accuracy" style="width: 300px; height: 200px; float: center"></div>-->
 
     </div>
 
@@ -272,7 +272,7 @@
 
 function markBestModel(series, availableModelaData){
   if(availableModelaData.length > 0){
-    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values});
+    series.push({name: availableModelaData[0].name, data: availableModelaData[0].values, accuracy: availableModelaData[0].accuracy});
     $("ul.multiselect-container > li > a > label.checkbox > input[type='checkbox']").first().click();
   }
   
@@ -292,7 +292,7 @@ function loadGraphData(series) {
   }
   for(i=0; i<models.length; i++){   
       if(!findElemArray(models[i], series)){
-        series.push({name: models[i].name, data: models[i].values})
+        series.push({name: models[i].name, data: models[i].values, accuracy: models[i].accuracy})
       }
       
   }
@@ -314,11 +314,59 @@ function refreshGraph(series) {
       chart.addSeries(series[i])
     }
     chart.redraw();
-
+    updateAccuracyCharts(series)
   }
 
   function refreshTables(){
 
+  }
+
+  function updateAccuracyCharts(series){
+    $("#containers > div").each(function(i, selectedElement) {
+      if(!findElemArray(selectedElement.id, series)){
+        selectedElement.remove();
+      }
+    });
+    var ids = $('#containers > div').map(function(){
+      return $(this).attr('id');
+      }).get();
+    for(i = 1; i < series.length; i++){
+      if(!findElemArray(series[i], ids)){
+        createAccuracyChart(series[i]);
+      }
+    }
+  }
+
+  function createAccuracyChart(model){
+       // The Accuracy gauge
+      $("#containers").append('<div id="'+model.name+'" style="width: 300px; height: 200px; float: center"></div>')
+      Highcharts.chart(model.name, Highcharts.merge(gaugeOptions, {
+          yAxis: {
+              min: 0,
+              max: 100,
+              title: {
+                  text: model.name + ' accuracy'
+              }
+          },
+
+          credits: {
+              enabled: false
+          },
+
+          series: [{
+              name: model.name +' accuracy',
+              data: [parseFloat(model.accuracy.toFixed(2))],
+              dataLabels: {
+                  format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                      ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                         '<span style="font-size:12px;color:silver">%</span></div>'
+              },
+              tooltip: {
+                  valueSuffix: ' %'
+              }
+          }]
+
+      }));
   }
 
   var gaugeOptions = {
@@ -374,39 +422,6 @@ function refreshGraph(series) {
         }
     }
 };
-
-
-
- 
-  // The Accuracy gauge
-Highcharts.chart('container-accuracy', Highcharts.merge(gaugeOptions, {
-    yAxis: {
-        min: 0,
-        max: 100,
-        title: {
-            text: 'Accuracy'
-        }
-    },
-
-    credits: {
-        enabled: false
-    },
-
-    series: [{
-        name: 'Accuracy',
-        data: [83],
-        dataLabels: {
-            format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-                ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-                   '<span style="font-size:12px;color:silver">%</span></div>'
-        },
-        tooltip: {
-            valueSuffix: ' %'
-        }
-    }]
-
-}));
-
 
 </script>
 

@@ -1,5 +1,7 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
@@ -34,7 +36,7 @@ public class StockForecastingService {
         return this.getForecastings(numWeeks, null);
     }
 
-    public ForecastingResult getForecastings(int numWeeks, LocalDate startDate){
+    public ForecastingResult getForecastings(int numWeeks, LocalDate startDate) {
         List<ProductStockData> fullProductStockData =  Lists.newArrayList(productStockDao.getAll()).stream()
                 .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
 
@@ -122,5 +124,13 @@ public class StockForecastingService {
                 .average();
 
         return error.isPresent() ? 100 * error.getAsDouble() : null;
+    }
+
+    public void saveStockData(ProductStockData data) {
+        productStockDao.saveItem(ImmutableMap.<String, AttributeValue>builder()
+                .put("lineNumber", new AttributeValue(data.getLineNumber()))
+                .put("date", new AttributeValue(data.getDate().toString()))
+                .put("stock", new AttributeValue().withN(String.valueOf(data.getStockValue())))
+                .build());
     }
 }
