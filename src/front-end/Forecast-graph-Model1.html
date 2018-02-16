@@ -243,7 +243,7 @@
 
    var series = [];
   $(document).ready(function(){
-
+    loadBackEndData(function() {
     var availableModels = getAvailableModels();
     var options = '';
     for (i = 0; i < availableModels.length; i++) {
@@ -267,7 +267,7 @@
       refreshTables();
     });
   
-
+  });
 });
 
 function markBestModel(series, availableModelaData){

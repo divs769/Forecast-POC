@@ -19,7 +19,8 @@ var modelData = [];
 var salesData =[];
 
 var modelList = [];
-$.ajax(
+function loadBackEndData(callback){
+    $.ajax(
     {
         dataType: 'json',
         headers: {
@@ -43,6 +44,7 @@ $.ajax(
                     accuracy: 100 - data.forecastings[i].error,
                     values:forecastingList
                });
+             
             }
             var historyDataList = [];
             for(j=0;j<data.historicData.length;j++){
@@ -50,15 +52,15 @@ $.ajax(
             }
             salesData.push({id: i+1, name: 'Sales Data',
                     values:historyDataList});
-            getAvailableModels()  ;
-           
+                    
+           callback();
         },
         error: function(data)
         {
             alert("error");
         }
     });
-
+}
     function getSalesData(){
         return salesData;
     }
