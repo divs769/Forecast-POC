@@ -3,7 +3,7 @@
 <head>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
-  <script src="http://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="highcharts.js"></script>
 
 
@@ -27,10 +27,134 @@
        });
    });
   </script>
+  <style>
+    /* Popup container - can be anything you want */
+    .popup {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* The actual popup */
+    .popup .popuptext {
+        visibility: hidden;
+        width: 500px;
+        background-color:floralwhite;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -80px;
+    }
+    
+    /* Popup arrow */
+    .popup .popuptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
+    
+    /* Toggle this class - hide and show the popup */
+    .popup .show {
+        visibility: visible;
+        -webkit-animation: fadeIn 1s;
+        animation: fadeIn 1s;
+    }
+    
+    /* Add animation (fade in the popup) */
+    @-webkit-keyframes fadeIn {
+        from {opacity: 0;} 
+        to {opacity: 1;}
+    }
+    
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity:1 ;}
+    }
+    .header-searchBtn{
+        background-color: #DE007B;
+        border: 0;
+        color: #FFF;
+        font-weight: 400;
+        font-size: 14px;
+        outline: 0;
+        background-color: #DE007B;
+        border-radius: 0;
+        padding: 12px 18px;
+        margin-left:403px;
+        margin-top:-45px;
+    } 
+    #header-searchInput.header-searchInput-isFocused {
+      border: 1px solid transparent;
+      border-radius: 2px 2px 0 0;
+      box-shadow: 0 0 4px 0 rgba(51, 51, 51, 0.2);
+      padding-bottom: 21px;
+      padding-top: 21px;
+    
+}
+
+ #header-searchInput {
+    -webkit-appearance: none;
+    display: block;
+    border-radius: 2px 0 0 2px;
+    border-width: 1px;
+    box-shadow: 0 2px 2px 0 rgba(51,51,51,.2);
+    color: #262626;
+    font-size: 14px;
+    border-color: #DE007B;
+    border-radius: 0;
+    border-width: 2px;
+    padding: 11px 11px 11px 32px;
+    width: 336px;
+    border-style: solid;
+    margin-left: 100px;
+    margin-top: 50px;
+    width:300px;
+    outline: 0;
+}
+.header-iconSearch {
+    background-image: none;
+    display: block;
+    height: 20px;
+    left: 137px;
+    position: absolute;
+    top: 65px;
+    width: 20px;
+}
+    </style>
 </head>
 
 <body>
-<div class="container-fluid">
+    <div id="search" style="width:100%">
+        <svg class="header-iconSearch" width="20" height="20" style="margin-left:200px;" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14.286 12.571h-.909l-.314-.314a7.358 7.358 0 0 0 1.794-4.828 7.428 7.428 0 1 0-7.428 7.428 7.383 7.383 0 0 0 4.828-1.788l.314.314v.903l5.715 5.703 1.703-1.703-5.703-5.715zm-6.857 0a5.143 5.143 0 1 1 0-10.286 5.143 5.143 0 0 1 0 10.286z" fill-rule="nonzero" fill="#333"></path>
+          </svg>
+          <input  name="header-searchInput" id="header-searchInput" placeholder="Search or enter item number" type="text" value="" ></input>
+        
+        <input class="header-searchBtn" value="Search" type="button" id="searchBtn" ></input>
+        <div id="lineItems" style="display:none">
+          <select id="lineItemSelect" style="padding:4px;margin-top:10px;margin-left:175px;">
+            <option>choose an item</option>
+            <option>101</option>
+            <option>102</option>
+          </select>
+        </div>
+    </div>
+
+<div class="container-fluid" id="productDets" style="display:none;padding-left:100px;padding-top:20px;">
   <div class="row">
     <div class="col">
       <div>
@@ -46,139 +170,24 @@
     </div>
   </div>
   <div class="row align-items-center">
-<!--
-    <div class="col">
-
-      <div class="pre-scrollable">
-        <table class="table table-hover">
-          <thead class="thead-light">
-          <tr>
-            <th colspan="2" class="text-center">
-              <b>Historic Data- Sales</b>
-            </th>
-          </tr>
-          <tr>
-            <th>Month/Year</th>
-            <th>Total Sales</th>
-          </tr>
-          </thead>
-          <tr>
-            <td>Jan 2017</td>
-            <td>3.9</td>
-          </tr>
-          <tr>
-            <td>Feb 2017</td>
-            <td>4.2</td>
-          </tr>
-          <tr>
-            <td>Mar 2017</td>
-            <td>5.7</td>
-          </tr>
-          <tr>
-            <td>Apr 2017</td>
-            <td>8.5</td>
-          </tr>
-          <tr>
-            <td>May 2017</td>
-            <td>11.9</td>
-          </tr>
-          <tr>
-            <td>Jun 2017</td>
-            <td>15.2</td>
-          </tr>
-          <tr>
-            <td>Jul 2017</td>
-            <td>17</td>
-          </tr>
-          <tr>
-            <td>Aug 2017</td>
-            <td>16.6</td>
-          </tr>
-          <tr>
-            <td>Sep 2017</td>
-            <td>14.2</td>
-          </tr>
-          <tr>
-            <td>Oct 2017</td>
-            <td>10.3</td>
-          </tr>
-          <tr>
-            <td>Nov 2017</td>
-            <td>6.6</td>
-          </tr>
-          <tr>
-            <td>Dec 2017</td>
-            <td>4.8</td>
-          </tr>
-        </table>
-      </div>
+    <div class="popup" id="historyTable">Historic table data
+      <span class="popuptext" id="myPopup">
+        <table class="table table-hover" id="historyData">
+              <thead class="table-info">
+              <tr>
+                <th class="thead-dark text-center" colspan="2">
+                  <b>Forecast Data - Demand </b>
+                </th>
+              </tr>
+              <tr>
+                <th>Month/Year</th>
+                <th>Total Demand</th>
+              </tr>
+              </thead>
+             
+            </table>
+      </span>
     </div>
-
-    <div class="col">
-      <div class="pre-scrollable">
-        <table class="table table-hover">
-          <thead class="table-info">
-          <tr>
-            <th class="thead-dark text-center" colspan="2">
-              <b>Forecast Data - Demand </b>
-            </th>
-          </tr>
-          <tr>
-            <th>Month/Year</th>
-            <th>Total Demand</th>
-          </tr>
-          </thead>
-          <tr>
-            <td>Jan 2018</td>
-            <td>7</td>
-          </tr>
-          <tr>
-            <td>Feb 2018</td>
-            <td>6.9</td>
-          </tr>
-          <tr>
-            <td>Mar 2018</td>
-            <td>9.5</td>
-          </tr>
-          <tr>
-            <td>Apr 2018</td>
-            <td>14.5</td>
-          </tr>
-          <tr>
-            <td>May 2018</td>
-            <td>18.4</td>
-          </tr>
-          <tr>
-            <td>Jun 2018</td>
-            <td>21.5</td>
-          </tr>
-          <tr>
-            <td>Jul 2018</td>
-            <td>25.2</td>
-          </tr>
-          <tr>
-            <td>Aug 2018</td>
-            <td>26.5</td>
-          </tr>
-          <tr>
-            <td>Sep 2018</td>
-            <td>23.3</td>
-          </tr>
-          <tr>
-            <td>Oct 2018</td>
-            <td>18.3</td>
-          </tr>
-          <tr>
-            <td>Nov 2018</td>
-            <td>13.9</td>
-          </tr>
-          <tr>
-            <td>Dec 2018</td>
-            <td>9.6</td>
-          </tr>
-        </table>
-      </div>
-    </div> -->
 
     <div id="containers" class="col align-self-center" style="display: flex;">
 
@@ -244,30 +253,55 @@
 
   });
 
+
+
    var series = [];
   $(document).ready(function(){
-    loadBackEndData(function() {
-    var availableModels = getAvailableModels();
-    var options = '';
-    for (i = 0; i < availableModels.length; i++) {
-      options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
-    }
-    $("#modelSelect").append(options);
-    $('#modelSelect').multiselect();
-
+    $('#searchBtn').click(function(){
+        $('#lineItems').show();
+      });
+     $('#lineItemSelect').change(function(){
+       $('#productDets').show();
+     }); 
     var sales =getSalesData();
-    
-    var availableModelaData = getAvailableModelDatas()
-    for(i=0;i<sales.length;i++){    
-      series.push({name: sales[i].name, data: sales[i].values})
-    }
-    markBestModel(series, availableModelaData)
+    loadBackEndData(function() {
+        var availableModels = getAvailableModels();
+        var options = '';
+        for (i = 0; i < availableModels.length; i++) {
+          options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
+        }
+        $("#modelSelect").append(options);
+        $('#modelSelect').multiselect();
+        var availableModelaData = getAvailableModelDatas()
+        for(i=0;i<sales.length;i++){    
+          series.push({name: sales[i].name, data: sales[i].values})
+        }
+        markBestModel(series, availableModelaData)
 
-    refreshGraph(series);
+        refreshGraph(series);
   
-  });
+    });
 
- refreshBtnFn();
+    refreshBtnFn();
+ // When the user clicks on div, open the popup
+    $('#historyTable').click(function() {
+       
+        for (var i = 0; i < sales[0].values.length; i++) {
+            drawRow(sales[0].values[i]);
+        }
+
+
+        function drawRow(rowData) {
+            var row = $("<tr />")
+            $("#historyData").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+            row.append($("<td>" +Highcharts.dateFormat('%A, %b %e, %Y', rowData.x)  + "</td>"));
+            row.append($("<td>" + rowData.y + "</td>"));
+          
+        }
+
+    var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+  });
 });
 
 function refreshBtnFn(){
