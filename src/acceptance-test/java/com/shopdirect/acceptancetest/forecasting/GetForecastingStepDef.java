@@ -5,8 +5,10 @@ import com.shopdirect.acceptancetest.LatestResponse;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +20,8 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -31,9 +35,11 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         super(restTemplate, latestResponse, db);
     }
 
-    @Given("^a payload with a number of weeks greater than (\\d+)$")
-    public void aPayloadWithANumberOfWeeksGreaterThan(int arg0) throws Throwable {
-        request = UriComponentsBuilder.fromUriString(ENDPOINT).pathSegment("4").build().toUri();
+    @Given("^a payload with (\\d+) weeks and \"([^\"]*)\" as line number number$")
+    public void aPayloadWithTheFollowingWeeksAndLineNumber(int weeks, String lineNumber) throws Throwable {
+        request = UriComponentsBuilder.fromUriString(ENDPOINT).pathSegment(weeks + "")
+                .path(lineNumber)
+                .build().toUri();
     }
 
     @Given("^the get endpoint is called$")
@@ -68,6 +74,8 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         for(ProductStockData product : products){
             addItem(product);
         }
+        addItem(new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 150, "8M215"));
+        addItem(new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 200, "8M214"));
     }
 
     @And("^the result contains the historic data$")
@@ -83,6 +91,7 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
     private void assertProductStocks(ProductStockData expected, ProductStockData actual){
         assertEquals(expected.getStockValue(), actual.getStockValue());
         assertEquals(expected.getDate(), actual.getDate());
+        assertEquals(expected.getLineNumber(), actual.getLineNumber());
     }
 
     @And("^the result contains the correct predictions for the naive model$")
@@ -147,5 +156,10 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
         List<ForecastingModelResult> forecastingData = result.getForecastings();
         assertTrue(forecastingData.get(0).getError() <= forecastingData.get(1).getError());
+    }
+
+    @Then("^the response is failure$")
+    public void theResponseIsFailure() throws Throwable {
+        assertThat(latestResponse.getResponse().getStatusCode().is4xxClientError(), is(true));
     }
 }

@@ -45,7 +45,7 @@ public class StockForecastingServiceTest {
     @Test
     public void testPredictionsWithStartDate(){
         initData();
-        ForecastingResult result = stockForecastingService.getForecastings(4, initialDate.plusWeeks(4));
+        ForecastingResult result = stockForecastingService.getForecastings(4, "8M417", initialDate.plusWeeks(4));
         assertEquals(4, result.getHistoricData().size());
         compareProductStock(prods[4], result.getHistoricData().get(0));
         compareProductStock(prods[5], result.getHistoricData().get(1));
@@ -80,7 +80,7 @@ public class StockForecastingServiceTest {
     @Test
     public void testPastPredictionsForBestModel() {
         initData();
-        ForecastingResult result = stockForecastingService.getForecastings(4);
+        ForecastingResult result = stockForecastingService.getForecastings(4, "8M417");
         assertEquals(8, result.getHistoricData().size());
         compareProductStock(prods[0], result.getHistoricData().get(0));
         compareProductStock(prods[1], result.getHistoricData().get(1));
@@ -162,6 +162,6 @@ public class StockForecastingServiceTest {
         prods[6] = new ProductStockData(initialDate.plusDays(42), 70);
         prods[7] = new ProductStockData(initialDate.plusDays(49), 80);
 
-        when(productStockDao.getAll()).thenReturn(Arrays.asList(prods));
+        when(productStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prods));
     }
 }

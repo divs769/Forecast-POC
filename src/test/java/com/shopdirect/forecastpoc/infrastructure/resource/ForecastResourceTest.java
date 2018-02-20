@@ -1,6 +1,7 @@
 package com.shopdirect.forecastpoc.infrastructure.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.junit.Test;
@@ -15,8 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
-import static org.mockito.Matchers.isA;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,17 +39,21 @@ public class ForecastResourceTest {
 
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeks() throws Exception {
-        mvc.perform(get("/forecast/1")).andExpect(status().isOk());
+        ForecastingResult forecastResult = new ForecastingResult();
+        when(service.getForecastings(anyInt(), anyString())).thenReturn(forecastResult);
+        mvc.perform(get("/forecast/1/8M417")).andExpect(status().isOk());
 
-        verify(service).getForecastings(1);
+        verify(service).getForecastings(1, "8M417");
     }
 
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeksAnd() throws Exception {
         LocalDate date = LocalDate.now();
-        mvc.perform(get("/forecast/1/" + date.toString())).andExpect(status().isOk());
+        ForecastingResult forecastResult =  new ForecastingResult();
+        when(service.getForecastings(anyInt(), anyString(), anyObject())).thenReturn(forecastResult);
+        mvc.perform(get("/forecast/1/8M417/" + date.toString())).andExpect(status().isOk());
 
-        verify(service).getForecastings(1, date);
+        verify(service).getForecastings(1, "8M417", date);
     }
 
     @Test

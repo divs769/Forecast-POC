@@ -32,13 +32,17 @@ public class StockForecastingService {
         forecastingMethods.put("average", StockForecastingModels::averagePrediction);
     }
 
-    public ForecastingResult getForecastings(int numWeeks){
-        return this.getForecastings(numWeeks, null);
+    public ForecastingResult getForecastings(int numWeeks, String lineNumber){
+        return this.getForecastings(numWeeks, lineNumber, null);
     }
 
-    public ForecastingResult getForecastings(int numWeeks, LocalDate startDate) {
-        List<ProductStockData> fullProductStockData =  Lists.newArrayList(productStockDao.getAll()).stream()
+    public ForecastingResult getForecastings(int numWeeks, String lineNumber, LocalDate startDate) {
+        List<ProductStockData> fullProductStockData =  Lists.newArrayList(productStockDao.getByLineNumber(lineNumber)).stream()
                 .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
+
+        if(fullProductStockData == null || fullProductStockData.isEmpty()){
+            return null;
+        }
 
         List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData, startDate);
         List<LocalDate> nextDates = getNextWeekDates(numWeeks, fullProductStockData.get(fullProductStockData.size() - 1))

@@ -20,11 +20,18 @@ public class ProductStockData {
     @DynamoDBAttribute
     private long stockValue;
 
-    @JsonCreator
-    public ProductStockData(@JsonProperty("date") LocalDate date, @JsonProperty("stock") long stockValue) {
+    public ProductStockData(LocalDate date, long stockValue) {
         this.date = date;
         this.stockValue = stockValue;
         this.lineNumber = "8M417";
+    }
+
+    @JsonCreator
+    public ProductStockData(@JsonProperty("date") LocalDate date, @JsonProperty("stock") long stockValue
+            , @JsonProperty("lineNumber") String lineNumber) {
+        this.date = date;
+        this.stockValue = stockValue;
+        this.lineNumber = lineNumber;
     }
 
     public ProductStockData() {}
@@ -41,8 +48,6 @@ public class ProductStockData {
         return lineNumber;
     }
 
-    // TODO: add JSON Property to constructor once we support multiple lines
-    @JsonProperty("lineNumber")
     public void setLineNumber(String lineNumber) {
         this.lineNumber = lineNumber;
     }

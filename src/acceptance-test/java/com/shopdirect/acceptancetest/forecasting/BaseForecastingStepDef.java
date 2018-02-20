@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.document.TableCollection;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.shopdirect.acceptancetest.CucumberStepsDefinition;
 import com.shopdirect.acceptancetest.LatestResponse;
+import com.shopdirect.acceptancetest.configuration.TestResponseErrorHandler;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +35,7 @@ public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
         this.latestResponse = latestResponse;
         this.db = new DynamoDB(db);
         this.dynamoDBMapper = new DynamoDBMapper(db);
+        this.restTemplate.setErrorHandler(new TestResponseErrorHandler());
     }
 
     protected Table createTable(DynamoDB db) {

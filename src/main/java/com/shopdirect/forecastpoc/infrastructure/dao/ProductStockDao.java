@@ -9,5 +9,7 @@ import java.util.Map;
 public interface ProductStockDao {
     List<ProductStockData> getAll();
 
+    List<ProductStockData> getByLineNumber(String lineNumber);
+
     void saveItem(Map<String, AttributeValue> values);
 }

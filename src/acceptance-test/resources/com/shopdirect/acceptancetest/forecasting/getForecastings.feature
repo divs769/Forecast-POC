@@ -5,7 +5,7 @@ Feature: Get forecastings
         And multiple stock values have been inserted
 
     Scenario: The request has a positive number of weeks
-        Given a payload with a number of weeks greater than 0
+        Given a payload with 4 weeks and "8M417" as line number number
         When the get endpoint is called
         Then the response is success
         And the result contains the historic data
@@ -13,3 +13,8 @@ Feature: Get forecastings
         And the result contains the forecasted values for the best model first
         And the result contains the correct predictions for the naive model
         And the result contains the correct predictions for the average model
+
+    Scenario: The request has no item with the given line number
+        Given a payload with 4 weeks and "8M416" as line number number
+        When the get endpoint is called
+        Then the response is failure
