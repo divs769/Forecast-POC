@@ -88,11 +88,11 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
        }
     }
 
-    @And("^the historic data is empty$")
+    @And("^the historic data and forecastings are empty$")
     public void theHistoricDataIsEmpty() throws Throwable {
         ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
-        List<ProductStockData> historicData = result.getHistoricData();
-        assertEquals(0, historicData.size());
+        assertEquals(0, result.getHistoricData().size());
+        assertEquals(0, result.getForecastings().size());
     }
 
     private void assertProductStocks(ProductStockData expected, ProductStockData actual){
@@ -149,13 +149,6 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         for(int i = 0; i < expectedForecastingValues.size(); i++){
             assertProductStocks(expectedForecastingValues.get(i), forecastingData.get(i));
         }
-    }
-
-    @And("^there are no forecastings$")
-    public void thereAreNoForecastings() throws Throwable {
-        ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
-        List<ForecastingModelResult> forecastingData = result.getForecastings();
-        assertEquals(null, forecastingData);
     }
 
     @And("^the result contains one prediction for each model$")
