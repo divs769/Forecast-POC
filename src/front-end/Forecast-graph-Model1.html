@@ -4,7 +4,10 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="highcharts.js"></script>
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+        <script src="https://code.highcharts.com/modules/data.js"></script>
+        <script src="https://code.highcharts.com/modules/series-label.js"></script>
+        <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
 
   <script src="https://code.highcharts.com/highcharts-more.js"></script>
@@ -94,7 +97,7 @@
         background-color: #DE007B;
         border-radius: 0;
         padding: 12px 18px;
-        margin-left:403px;
+        margin-left:703px;
         margin-top:-45px;
     } 
     .refreshBtn{
@@ -156,7 +159,7 @@
           </svg>
           <input  name="header-searchInput" id="header-searchInput" placeholder="Search or enter item number" type="text" value="" ></input>
         
-        <input class="header-searchBtn" value="Search" type="button" id="searchBtn" ></input>
+        
         <div id="lineItems" style="display:none">
           <select id="lineItemSelect" style="padding:4px;margin-top:-40px;margin-left:500px;">
             <option>choose an item</option>
@@ -164,6 +167,23 @@
             <option>102</option>
           </select>
         </div>
+       
+        <div class="container"  style="padding:4px;margin-top:-45px;margin-left:420px;">
+          <div class="row">
+            <div class="col-xs-3 col-xs-offset-3">
+              <div class="input-group number-spinner">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-minus">-</span></button>
+                </span>
+                <input type="text" class="form-control text-center" value="1">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-plus">+</span></button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <input class="header-searchBtn" value="Search" type="button" id="searchBtn" ></input>
     </div>
 
 <div class="container-fluid" id="productDets" style="display:none;padding-left:100px;padding-top:20px;">
@@ -269,14 +289,31 @@
 
    var series = [];
   $(document).ready(function(){
-    $('#searchBtn').click(function(){
-        $('#lineItems').show();
-      });
-     $('#lineItemSelect').change(function(){
-       $('#productDets').show();
-     }); 
+    $(document).on('click', '.number-spinner button', function () {    
+        var btn = $(this),
+          oldValue = btn.closest('.number-spinner').find('input').val().trim(),
+          newVal = 0;
+        
+        if (btn.attr('data-dir') == 'up') {
+          newVal = parseInt(oldValue) + 1;
+        } else {
+          if (oldValue > 1) {
+            newVal = parseInt(oldValue) - 1;
+          } else {
+            newVal = 1;
+          }
+        }
+        btn.closest('.number-spinner').find('input').val(newVal);
+    });
+
     var sales =getSalesData();
-    loadBackEndData(function() {
+   
+    
+    $('#searchBtn').click(function(){
+        $('#productDets').show();
+        var weeks = $('.number-spinner button').closest('.number-spinner').find('input').val().trim();
+        var lineNumber = $('#header-searchInput').val();
+        loadBackEndData(function() {
         var availableModels = getAvailableModels();
         var options = '';
         for (i = 0; i < availableModels.length; i++) {
@@ -292,7 +329,11 @@
 
         refreshGraph(series);
   
-    });
+        },weeks,lineNumber);
+      });
+    
+    
+    
 
     refreshBtnFn();
  // When the user clicks on div, open the popup
@@ -306,7 +347,7 @@
         function drawRow(rowData) {
             var row = $("<tr />")
             $("#historyData").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-            row.append($("<td>" +Highcharts.dateFormat('%A, %b %e, %Y', rowData.x)  + "</td>"));
+            row.append($("<td>" +Highcharts.dateFormat('%b %e %Y', rowData.x)  + "</td>"));
             row.append($("<td>" + rowData.y + "</td>"));
           
         }
