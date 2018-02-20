@@ -136,7 +136,7 @@
     width: 336px;
     border-style: solid;
     margin-left: 100px;
-    margin-top: 50px;
+    margin-top: -16px;
     width:300px;
     outline: 0;
 }
@@ -146,14 +146,40 @@
     height: 20px;
     left: 137px;
     position: absolute;
-    top: 65px;
+    top: 80px;
     width: 20px;
+}
+ul#bs-tab-links {
+    width: 764px;
+    height: 65px;
+    clear: both;
+    margin-left: 100px;
+    padding: 0px;
+    background: #f6f6f6;
+  
+}
+ul#bs-tab-links>li {
+    width: 50%;
+    list-style: none;
+    float: left;
+    margin: 0px;
+    padding: 20px;
+    text-decoration: none
+}
+user agent stylesheet
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
 }
     </style>
 </head>
 
 <body>
     <div id="search" style="width:100%">
+        <ul id="bs-tab-links">
+            <li><a id="tab-link-products" class="selected" data-tab="1" href="#bs-tab-products">Enter LineNumber</a></li>
+            <li><a id="tab-link-bs" data-tab="2" href="#bs-tab-bs">Weeks</a></li>
+            </ul>
         <svg class="header-iconSearch" width="20" height="20" style="margin-left:200px;" xmlns="http://www.w3.org/2000/svg">
           <path d="M14.286 12.571h-.909l-.314-.314a7.358 7.358 0 0 0 1.794-4.828 7.428 7.428 0 1 0-7.428 7.428 7.383 7.383 0 0 0 4.828-1.788l.314.314v.903l5.715 5.703 1.703-1.703-5.703-5.715zm-6.857 0a5.143 5.143 0 1 1 0-10.286 5.143 5.143 0 0 1 0 10.286z" fill-rule="nonzero" fill="#333"></path>
           </svg>
@@ -168,7 +194,7 @@
           </select>
         </div>
        
-        <div class="container"  style="padding:4px;margin-top:-45px;margin-left:420px;">
+        <div class="container"  style="padding:4px;margin-top:-50px;margin-left:426px;">
           <div class="row">
             <div class="col-xs-3 col-xs-offset-3">
               <div class="input-group number-spinner">
