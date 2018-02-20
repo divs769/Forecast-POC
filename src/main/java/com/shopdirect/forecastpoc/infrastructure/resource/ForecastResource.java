@@ -5,7 +5,6 @@ import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,23 +24,15 @@ public class ForecastResource {
     }
 
     @RequestMapping(method = GET, path = "/{weeks}/{lineNumber}/{startDate}")
-    public ResponseEntity<ForecastingResult> getForecastResult(@PathVariable int weeks,
+    public ForecastingResult getForecastResult(@PathVariable int weeks,
                                                @PathVariable String lineNumber,
                                                @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
-        return createResponse(service.getForecastings(weeks, lineNumber, startDate));
+        return service.getForecastings(weeks, lineNumber, startDate);
     }
 
     @RequestMapping(method = GET, path = "/{weeks}/{lineNumber}")
-    public ResponseEntity<ForecastingResult> getForecastResult(@PathVariable int weeks, @PathVariable String lineNumber) {
-        return createResponse(service.getForecastings(weeks, lineNumber));
-    }
-
-    private ResponseEntity<ForecastingResult> createResponse(ForecastingResult result){
-        if(result == null){
-            return ResponseEntity.notFound().build();
-        }else{
-            return ResponseEntity.ok(result);
-        }
+    public ForecastingResult getForecastResult(@PathVariable int weeks, @PathVariable String lineNumber) {
+        return service.getForecastings(weeks, lineNumber);
     }
 
     @RequestMapping(method = POST)

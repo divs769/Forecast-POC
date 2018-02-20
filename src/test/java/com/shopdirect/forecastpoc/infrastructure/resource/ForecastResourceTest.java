@@ -39,8 +39,6 @@ public class ForecastResourceTest {
 
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeks() throws Exception {
-        ForecastingResult forecastResult = new ForecastingResult();
-        when(service.getForecastings(anyInt(), anyString())).thenReturn(forecastResult);
         mvc.perform(get("/forecast/1/8M417")).andExpect(status().isOk());
 
         verify(service).getForecastings(1, "8M417");
@@ -49,8 +47,6 @@ public class ForecastResourceTest {
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeksAnd() throws Exception {
         LocalDate date = LocalDate.now();
-        ForecastingResult forecastResult =  new ForecastingResult();
-        when(service.getForecastings(anyInt(), anyString(), anyObject())).thenReturn(forecastResult);
         mvc.perform(get("/forecast/1/8M417/" + date.toString())).andExpect(status().isOk());
 
         verify(service).getForecastings(1, "8M417", date);

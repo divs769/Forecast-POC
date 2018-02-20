@@ -41,7 +41,7 @@ public class StockForecastingService {
                 .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
 
         if(fullProductStockData == null || fullProductStockData.isEmpty()){
-            return null;
+            return new ForecastingResult(null, fullProductStockData);
         }
 
         List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData, startDate);

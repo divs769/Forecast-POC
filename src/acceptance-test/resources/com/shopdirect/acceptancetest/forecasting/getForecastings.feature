@@ -17,4 +17,6 @@ Feature: Get forecastings
     Scenario: The request has no item with the given line number
         Given a payload with 4 weeks and "8M416" as line number number
         When the get endpoint is called
-        Then the response is failure
+        Then the response is success
+        And the historic data is empty
+        And there are no forecastings
