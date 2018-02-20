@@ -215,6 +215,7 @@ public class StockForecastingServiceTest {
     private void compareProductStock(ProductStockData expected, ProductStockData actual){
         assertEquals(expected.getDate(), actual.getDate());
         assertEquals(expected.getStockValue(), actual.getStockValue());
+        assertEquals(expected.getLineNumber(), actual.getLineNumber());
     }
 
     private void initData() {

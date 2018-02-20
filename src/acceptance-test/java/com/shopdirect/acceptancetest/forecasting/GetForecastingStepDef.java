@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -50,26 +51,26 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
     @And("^multiple stock values have been inserted$")
     public void multipleStockValuesHaveBeenInserted() throws Throwable {
         products = Arrays.asList(
-                new ProductStockData(LocalDate.of(2018, Month.FEBRUARY, 12), 100),
-                new ProductStockData(LocalDate.of(2018, Month.FEBRUARY, 05), 80),
-                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 29), 120),
-                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 22), 90),
-                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 15), 70),
-                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 8), 60),
-                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 1), 150),
-                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 25), 140),
-                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 18), 130),
-                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 11), 110),
-                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 4), 50),
-                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 27), 20),
-                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 20), 30),
-                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 13), 40),
-                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 6), 60),
-                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 30), 64),
-                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 23), 36),
-                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 16), 42),
+                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 100),
                 new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 9), 90),
-                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 100)
+                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 16), 42),
+                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 23), 36),
+                new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 30), 64),
+                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 6), 60),
+                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 13), 40),
+                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 20), 30),
+                new ProductStockData(LocalDate.of(2017, Month.NOVEMBER, 27), 20),
+                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 4), 50),
+                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 11), 110),
+                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 18), 130),
+                new ProductStockData(LocalDate.of(2017, Month.DECEMBER, 25), 140),
+                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 1), 150),
+                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 8), 60),
+                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 15), 70),
+                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 22), 90),
+                new ProductStockData(LocalDate.of(2018, Month.JANUARY, 29), 120),
+                new ProductStockData(LocalDate.of(2018, Month.FEBRUARY, 05), 80),
+                new ProductStockData(LocalDate.of(2018, Month.FEBRUARY, 12), 100)
         );
         for(ProductStockData product : products){
             addItem(product);
@@ -78,13 +79,22 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
         addItem(new ProductStockData(LocalDate.of(2017, Month.OCTOBER, 2), 200, "8M214"));
     }
 
+    @Given("^the database has rows with \"([^\"]*)\" as line number$")
+    public void theDatabaseHasRowsWithAsLineNumber(String lineNumber) throws Throwable {
+        products = Arrays.asList(
+                new ProductStockData(LocalDate.of(2017, Month.FEBRUARY, 5), 150, lineNumber),
+                new ProductStockData(LocalDate.of(2017, Month.FEBRUARY, 12), 150, lineNumber));
+        addItem(products.get(0));
+        addItem(products.get(1));
+    }
+
     @And("^the result contains the historic data$")
     public void theResultContainsTheHistoricData() throws Throwable {
        ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
        List<ProductStockData> historicData = result.getHistoricData();
        assertEquals(products.size(), historicData.size());
        for(int i = 0; i < products.size(); i++){
-           assertProductStocks(products.get(products.size() - 1 - i), historicData.get(i));
+           assertProductStocks(products.get(i), historicData.get(i));
        }
     }
 
@@ -168,5 +178,19 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
     @Then("^the response is failure$")
     public void theResponseIsFailure() throws Throwable {
         assertThat(latestResponse.getResponse().getStatusCode().is4xxClientError(), is(true));
+    }
+
+    @And("^the result contains only predictions with \"([^\"]*)\" as line number$")
+    public void theResultContainsOnlyPredictionsWithAsLineNumber(String lineNumber) throws Throwable {
+        ForecastingResult result = (ForecastingResult) latestResponse.getResponse().getBody();
+        List<ForecastingModelResult> forecastings = result.getForecastings();
+        assertEquals(2, forecastings.size());
+        assertEquals(products.size() + 3, forecastings.get(0).getForecastedValues().size());
+        assertEquals(products.size() + 3, forecastings.get(1).getForecastedValues().size());
+        Optional foundAny = forecastings
+                .stream().flatMap(l -> l.getForecastedValues().stream())
+                .filter(prodStockData -> !prodStockData.getLineNumber().equals(lineNumber))
+                .findAny();
+        assertEquals(false, foundAny.isPresent());
     }
 }

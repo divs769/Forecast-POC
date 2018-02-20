@@ -30,7 +30,7 @@ public class StockForecastingModelsTest {
                 new ProductStockData(d5, 25),
                 new ProductStockData(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4));
+        ), Stream.of(d1, d2, d3, d4), "8M417");
         List<ProductStockData> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
         compareProductStock(new ProductStockData(d1, 15),
@@ -50,7 +50,7 @@ public class StockForecastingModelsTest {
                 new ProductStockData(d7, 25),
                 new ProductStockData(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4));
+        ), Stream.of(d1, d2, d3, d4), "8M417");
 
         List<ProductStockData> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
@@ -71,7 +71,7 @@ public class StockForecastingModelsTest {
                 new ProductStockData(d6, 10),
                 new ProductStockData(d5, 20)
 
-        ), Stream.of(d1, d2, d3, d4));
+        ), Stream.of(d1, d2, d3, d4), "8M417");
 
         List<ProductStockData> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
@@ -92,7 +92,7 @@ public class StockForecastingModelsTest {
                 new ProductStockData(d5, 10),
                 new ProductStockData(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4));
+        ), Stream.of(d1, d2, d3, d4), "8M417");
 
         List<ProductStockData> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());

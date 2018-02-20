@@ -7,12 +7,12 @@ import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.util.TriFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toMap;
 public class StockForecastingService {
 
     private final ProductStockDao productStockDao;
-    private Map<String, BiFunction<Stream<ProductStockData>, Stream<LocalDate>, Stream<ProductStockData>>> forecastingMethods;
+    private Map<String, TriFunction<Stream<ProductStockData>, Stream<LocalDate>, String, Stream<ProductStockData>>> forecastingMethods;
 
     @Autowired
     public StockForecastingService(ProductStockDao productStockDao) {
@@ -51,7 +51,7 @@ public class StockForecastingService {
 
          for(String name : forecastingMethods.keySet()){
              Stream<ProductStockData> newForecastings = forecastingMethods.get(name)
-                     .apply(fullProductStockData.stream(), nextDates.stream());
+                     .apply(fullProductStockData.stream(), nextDates.stream(), fullProductStockData.get(0).getLineNumber());
 
              forecastings.stream()
                      .filter(forecastingResult -> forecastingResult.getName().equals(name))
@@ -91,8 +91,10 @@ public class StockForecastingService {
             forecastings = Stream.of();
             for (int i = productsBeforeStartDate; i < fullProductStockData.size(); i++) {
                 date = fullProductStockData.get(i).getDate();
-                forecasting = forecastingMethods.get(name).apply(fullProductStockData.stream().limit(i),
-                        Stream.of(date));
+                forecasting = forecastingMethods.get(name)
+                        .apply(fullProductStockData.stream().limit(i),
+                        Stream.of(date),
+                        fullProductStockData.get(i).getLineNumber());
                 forecastings = Stream.concat(forecastings, forecasting);
             }
             result.put(name, forecastings.collect(Collectors.toList()));
