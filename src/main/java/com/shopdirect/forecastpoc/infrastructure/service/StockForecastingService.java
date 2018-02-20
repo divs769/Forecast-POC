@@ -16,6 +16,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toMap;
 
 @Component
@@ -109,7 +110,7 @@ public class StockForecastingService {
                     Double error = calculateError(forecastings, actualValues);
                     return new ForecastingModelResult(forecastings, error, map.getKey());
                 })
-                .sorted(Comparator.comparing(ForecastingModelResult::getError))
+                .sorted(Comparator.comparing(ForecastingModelResult::getError, Comparator.nullsLast(naturalOrder())))
                 .collect(Collectors.toList());
     }
 

@@ -136,13 +136,80 @@ public class StockForecastingServiceTest {
         assertEquals(data.getStockValue(), Long.parseLong(item.get("stock").getN()));
     }
 
+    @Test
+    public void testHistoryWith0Products(){
+        when(productStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList());
+        ForecastingResult result = stockForecastingService.getForecastings(4, "8M417");
+        assertEquals(0, result.getHistoricData().size());
+        assertEquals(0, result.getForecastings().size());
+    }
+
+    @Test
+    public void testHistoryWith1Product(){
+        ProductStockData prod = new ProductStockData(initialDate, 10);
+        when(productStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prod));
+        ForecastingResult result = stockForecastingService.getForecastings(4, "8M417");
+        assertEquals(1, result.getHistoricData().size());
+        compareProductStock(prod, result.getHistoricData().get(0));
+        List<ForecastingModelResult> results = result.getForecastings();
+        assertEquals(2, results.size());
+        ForecastingModelResult result1 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), 10),
+                new ProductStockData(initialDate.plusDays(14), 10),
+                new ProductStockData(initialDate.plusDays(21), 10),
+                new ProductStockData(initialDate.plusDays(28), 10)
+        ), null, "average");
+        ForecastingModelResult result2 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), 10),
+                new ProductStockData(initialDate.plusDays(14), 10),
+                new ProductStockData(initialDate.plusDays(21), 10),
+                new ProductStockData(initialDate.plusDays(28), 10)
+        ), null, "naive");
+        compareForecastingResult(result1, results.get(0));
+        compareForecastingResult(result2, results.get(1));
+    }
+
+    @Test
+    public void testForecastingsSameError(){
+        ProductStockData prod = new ProductStockData(initialDate, 10);
+        ProductStockData prod2 = new ProductStockData(initialDate.plusDays(7), 10);
+        when(productStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prod, prod2));
+        ForecastingResult result = stockForecastingService.getForecastings(4, "8M417");
+        assertEquals(2, result.getHistoricData().size());
+        compareProductStock(prod, result.getHistoricData().get(0));
+        compareProductStock(prod2, result.getHistoricData().get(1));
+        List<ForecastingModelResult> results = result.getForecastings();
+        assertEquals(2, results.size());
+        ForecastingModelResult result1 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), 10),
+                new ProductStockData(initialDate.plusDays(14), 10),
+                new ProductStockData(initialDate.plusDays(21), 10),
+                new ProductStockData(initialDate.plusDays(28), 10),
+                new ProductStockData(initialDate.plusDays(35), 10)
+        ), 0.0, "average");
+        ForecastingModelResult result2 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), 10),
+                new ProductStockData(initialDate.plusDays(14), 10),
+                new ProductStockData(initialDate.plusDays(21), 10),
+                new ProductStockData(initialDate.plusDays(28), 10),
+                new ProductStockData(initialDate.plusDays(35), 10)
+        ), 0.0, "naive");
+        compareForecastingResult(result1, results.get(0));
+        compareForecastingResult(result2, results.get(1));
+    }
+
     private void compareForecastingResult(ForecastingModelResult expected, ForecastingModelResult actual){
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.getForecastedValues().size(), actual.getForecastedValues().size());
         for(int i = 0; i < expected.getForecastedValues().size(); i++){
             compareProductStock(expected.getForecastedValues().get(i), actual.getForecastedValues().get(i));
         }
-        assertEquals(expected.getError(), actual.getError(), 0.001);
+        if(expected.getError() != null){
+            assertEquals(expected.getError(), actual.getError(), 0.001);
+        }else{
+            assertEquals(expected.getError(), actual.getError());
+        }
+
     }
 
     private void compareProductStock(ProductStockData expected, ProductStockData actual){
@@ -151,7 +218,6 @@ public class StockForecastingServiceTest {
     }
 
     private void initData() {
-        initialDate = LocalDate.of(2017, Month.DECEMBER, 25);
         prods = new ProductStockData[8];
         prods[0] = new ProductStockData(initialDate, 10);
         prods[1] = new ProductStockData(initialDate.plusDays(7), 20);
