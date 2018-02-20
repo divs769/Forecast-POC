@@ -177,7 +177,7 @@ li {
 <body>
     <div id="search" style="width:100%">
         <ul id="bs-tab-links">
-            <li><a id="tab-link-products" class="selected" data-tab="1" href="#bs-tab-products">Enter LineNumber</a></li>
+            <li><a id="tab-link-products" class="selected" data-tab="1" href="#bs-tab-products">Enter item number</a></li>
             <li><a id="tab-link-bs" data-tab="2" href="#bs-tab-bs">Weeks</a></li>
             </ul>
         <svg class="header-iconSearch" width="20" height="20" style="margin-left:200px;" xmlns="http://www.w3.org/2000/svg">
@@ -211,7 +211,10 @@ li {
         </div>
         <input class="header-searchBtn" value="Search" type="button" id="searchBtn" ></input>
     </div>
-
+    <p>
+        <img id="salesForecastImg" src="https://accountlearning.com/wp-content/uploads/2016/06/Sales-Forecast.jpg" alt="Sales Forecast POC"  style="padding-top:100px;padding-left:300px;" >
+    </p>
+   
 <div class="container-fluid" id="productDets" style="display:none;padding-left:100px;padding-top:20px;">
   <div class="row">
     <div class="col">
@@ -254,7 +257,9 @@ li {
     </div>
 
   </div>
-</div>
+
+ 
+</div> 
 
 </body>
 
@@ -337,6 +342,7 @@ li {
     
     $('#searchBtn').click(function(){
         $('#productDets').show();
+        $('#salesForecastImg').hide();
         var weeks = $('.number-spinner button').closest('.number-spinner').find('input').val().trim();
         var lineNumber = $('#header-searchInput').val();
         loadBackEndData(function() {
