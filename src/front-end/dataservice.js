@@ -2,7 +2,6 @@
 var modelData = [];
 var salesData =[];
 
-var modelList = [];
 function loadBackEndData(callback,weeks,lineNumber){
     $.ajax(
     {
@@ -16,26 +15,26 @@ function loadBackEndData(callback,weeks,lineNumber){
         url:'http://localhost:8080/forecast/'+weeks+'/'+lineNumber,
         success: function(data)
         {
+            modelData.length = data.forecastings.length
             for (i = 0; i < data.forecastings.length; i++) { 
-                modelList.push({id: i+1, name: data.forecastings[i].name}); 
                 var forecastingList = [];
                 var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
                     for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
                         forecastingList.push({x: getNewDate(data.forecastings[i].forecastedValues[x].date), 
                             y: data.forecastings[i].forecastedValues[x].stockValue});
                     }
-                modelData.push({id: i+1, name: data.forecastings[i].name,
+                modelData[i] = {id: i+1, name: data.forecastings[i].name,
                     error: data.forecastings[i].error,
                     values:forecastingList
-               });
+               };
              
             }
             var historyDataList = [];
             for(j=0;j<data.historicData.length;j++){
                     historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stockValue});
             }
-            salesData.push({id: i+1, name: 'Sales Data',
-                    values:historyDataList});
+            salesData[0] = {id: i+1, name: 'Sales Data',
+                    values:historyDataList};
                     
            callback();
         },
@@ -54,11 +53,8 @@ function getNewDate(date){
 }
 
 function getAvailableModels(){
-    return modelList;
+   return modelData;
 } 
-function getAvailableModelDatas(){
-    return modelData;
-}
 function getModel(id) {
     var modelDetailsList = [];
     for (i = 0; i < modelData.length; i++) {

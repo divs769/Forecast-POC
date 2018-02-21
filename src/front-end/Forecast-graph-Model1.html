@@ -339,7 +339,6 @@ li {
 
     var sales =getSalesData();
    
-    
     $('#searchBtn').click(function(){
         $('#productDets').show();
         $('#salesForecastImg').hide();
@@ -347,17 +346,18 @@ li {
         var lineNumber = $('#header-searchInput').val();
         loadBackEndData(function() {
         var availableModels = getAvailableModels();
-        var options = '';
+        var options = [];
         for (i = 0; i < availableModels.length; i++) {
-          options += '<option value="' + availableModels[i].id + '">' + availableModels[i].name + '</option>';
+          options[i] = '<option value="' + availableModels[i].name + '">' + availableModels[i].name + '</option>';
         }
+        deleteOldCharts();
         $("#modelSelect").append(options);
-        $('#modelSelect').multiselect();
-        var availableModelaData = getAvailableModelDatas()
+        $('#modelSelect').multiselect('rebuild');
+    
         for(i=0;i<sales.length;i++){    
           series.push({name: sales[i].name, data: sales[i].values})
         }
-        markBestModel(series, availableModelaData)
+        markBestModel(series, availableModels)
 
         refreshGraph(series);
   
@@ -444,6 +444,16 @@ function refreshGraph(series) {
     updateErrorCharts(series)
   }
 
+  function deleteOldCharts(){
+    series = []
+    var seriesLength = chart.series.length;
+    for(var i = seriesLength - 1; i > -1; i--) {
+        chart.series[i].remove();
+    }
+    $("#containers > div").remove()
+    $('#modelSelect').children().remove()
+  }
+
   function refreshTables(){
 
   }
@@ -466,19 +476,22 @@ function refreshGraph(series) {
 
   function createErrorChart(model){
       var color;
-      if(model.error <= 30){
-        color = 'rgb(140, 227, 5)'; //green
-      }else if(model.error <= 60){
-        color = '#f7f75c'; //yellow
-      }else{
-        color = '#f75454'; //red
+      if(model.error != null){
+         if(model.error <= 30){
+          color = 'rgb(140, 227, 5)'; //green
+        }else if(model.error <= 60){
+          color = '#f7f75c'; //yellow
+        }else{
+          color = '#f75454'; //red
+        }
+         // The Error gauge
+        $("#containers").append('<div id="'+model.name+'" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">'+
+          '<div>' + model.name +' error </div>' +
+          '<div style="border-radius: 50%; width: 100px; height: 100px; background-color:'+color+';">' +
+            '<span style="position: relative; top: 37%;">' +model.error.toFixed(2)+"%" + '</span></div>' +
+        '</div>')
       }
-       // The Error gauge
-      $("#containers").append('<div id="'+model.name+'" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">'+
-        '<div>' + model.name +' error </div>' +
-        '<div style="border-radius: 50%; width: 100px; height: 100px; background-color:'+color+';">' +
-          '<span style="position: relative; top: 37%;">' +model.error.toFixed(2)+"%" + '</span></div>' +
-      '</div>')
+     
   }
 
   var gaugeOptions = {
