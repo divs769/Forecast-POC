@@ -2,7 +2,14 @@
 var modelData = [];
 var salesData =[];
 
-function loadBackEndData(callback,weeks,lineNumber){
+function loadBackEndData(callback,weeks,lineNumber, startDate){
+    var datePath = ""
+    if(startDate !== ""){
+        var splittedDate = startDate.split("/")
+        if(splittedDate.length == 3){
+            datePath += "/" + splittedDate.reverse().join("-")
+        }
+    }
     $.ajax(
     {
         dataType: 'json',
@@ -12,9 +19,10 @@ function loadBackEndData(callback,weeks,lineNumber){
             "Access-Control-Allow-Origin": "*"
         },
         type:'GET',
-        url:'http://localhost:8080/forecast/'+weeks+'/'+lineNumber,
+        url:'http://localhost:8080/forecast/'+weeks+'/'+lineNumber+datePath,
         success: function(data)
         {
+            console.log(data)
             modelData.length = data.forecastings.length
             for (i = 0; i < data.forecastings.length; i++) { 
                 var forecastingList = [];
