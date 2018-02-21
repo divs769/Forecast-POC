@@ -33,8 +33,13 @@ function loadBackEndData(callback,weeks,lineNumber){
             for(j=0;j<data.historicData.length;j++){
                     historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stockValue});
             }
-            salesData[0] = {id: i+1, name: 'Sales Data',
+            if(historyDataList.length > 0){
+                salesData[0] = {id: i+1, name: 'Sales Data',
                     values:historyDataList};
+            }else{
+                salesData.length = 0
+            }
+            
                     
            callback();
         },
@@ -55,16 +60,17 @@ function getNewDate(date){
 function getAvailableModels(){
    return modelData;
 } 
-function getModel(id) {
-    var modelDetailsList = [];
+function getModel(names) {
+    /*var modelDetailsList = [];
     for (i = 0; i < modelData.length; i++) {
-        for (x = 0; x < id.length; x++) {
-            console.log("Comparing models ", modelData[i].id, id[x])
-            if (modelData[i].id.toString() === id[x].toString()) {
+        for (x = 0; x < names.length; x++) {
+            console.log("Comparing models ", modelData[i].name, names[x])
+            if (modelData[i].name === names[x]) {
                 modelDetailsList.push(modelData[i]);
             }
         }
     }
     console.log("Model Details List", modelDetailsList)
-    return modelDetailsList;
+    return modelDetailsList;*/
+    return modelData.filter(modelElem => names.indexOf(modelElem.name) !== -1)
 }
