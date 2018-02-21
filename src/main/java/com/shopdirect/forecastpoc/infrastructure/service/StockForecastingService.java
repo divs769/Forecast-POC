@@ -46,7 +46,7 @@ public class StockForecastingService {
         }
 
         List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData, startDate);
-        List<LocalDate> nextDates = getNextWeekDates(numWeeks, fullProductStockData.get(fullProductStockData.size() - 1))
+        List<LocalDate> nextDates = getNextWeekDates(numWeeks, fullProductStockData.get(fullProductStockData.size() - 1), startDate)
                 .collect(Collectors.toList());
 
          for(String name : forecastingMethods.keySet()){
@@ -116,9 +116,16 @@ public class StockForecastingService {
                 .collect(Collectors.toList());
     }
 
-    private static Stream<LocalDate> getNextWeekDates(int numberWeeks, ProductStockData lastStockData){
+    private static Stream<LocalDate> getNextWeekDates(int numberWeeks, ProductStockData lastStockData, LocalDate startDate){
+        LocalDate firstDate;
+        if(startDate == null
+                || startDate.isBefore(lastStockData.getDate())){
+            firstDate = lastStockData.getDate().plusDays(7);
+        }else{
+            firstDate = startDate;
+        }
         return Stream
-                .iterate(lastStockData.getDate().plusDays(7),
+                .iterate(firstDate,
                         localDate -> localDate.plusDays(7))
                 .limit(numberWeeks);
     }

@@ -170,6 +170,27 @@ public class StockForecastingServiceTest {
     }
 
     @Test
+    public void testFutureStartDate(){
+        ProductStockData prod = new ProductStockData(initialDate, 10);
+        ProductStockData prod2 = new ProductStockData(initialDate.plusDays(7), 20);
+        when(productStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prod, prod2));
+        ForecastingResult result = stockForecastingService.getForecastings(2, "8M417", initialDate.plusWeeks(3));
+        assertEquals(0, result.getHistoricData().size());
+        List<ForecastingModelResult> results = result.getForecastings();
+        assertEquals(2, results.size());
+        ForecastingModelResult result1 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusWeeks(3), 15),
+                new ProductStockData(initialDate.plusWeeks(4), 15)
+        ), null, "average");
+        ForecastingModelResult result2 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusWeeks(3), 20),
+                new ProductStockData(initialDate.plusWeeks(4), 20)
+        ), null, "naive");
+        compareForecastingResult(result1, results.get(0));
+        compareForecastingResult(result2, results.get(1));
+    }
+
+    @Test
     public void testForecastingsSameError(){
         ProductStockData prod = new ProductStockData(initialDate, 10);
         ProductStockData prod2 = new ProductStockData(initialDate.plusDays(7), 10);
