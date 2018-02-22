@@ -1,6 +1,7 @@
 package com.shopdirect.forecastpoc.infrastructure.resource;
 
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
+import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +24,18 @@ public class ForecastResource {
         this.service = service;
     }
 
-    @RequestMapping(method = GET, path = "/{weeks}/{lineNumber}/{startDate}")
+    @RequestMapping(method = GET, path = "/{weeks}/{hierarchyType}/{hierarchyValue}/{startDate}")
     public ForecastingResult getForecastResult(@PathVariable int weeks,
-                                               @PathVariable String lineNumber,
+                                               @PathVariable String hierarchyType,
+                                               @PathVariable String hierarchyValue,
                                                @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
-        return service.getForecastings(weeks, lineNumber, startDate);
+        return service.getForecastings(weeks, ProductHierarchy.getProductHierarchy(hierarchyType), hierarchyValue, startDate);
     }
 
-    @RequestMapping(method = GET, path = "/{weeks}/{lineNumber}")
-    public ForecastingResult getForecastResult(@PathVariable int weeks, @PathVariable String lineNumber) {
-        return service.getForecastings(weeks, lineNumber);
+    @RequestMapping(method = GET, path = "/{weeks}/{hierarchyType}/{hierarchyValue}")
+    public ForecastingResult getForecastResult(@PathVariable int weeks, @PathVariable String hierarchyType,
+                                               @PathVariable String hierarchyValue) {
+        return service.getForecastings(weeks, ProductHierarchy.getProductHierarchy(hierarchyType), hierarchyValue);
     }
 
     @RequestMapping(method = POST)

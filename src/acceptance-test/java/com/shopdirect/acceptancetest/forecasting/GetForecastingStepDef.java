@@ -38,8 +38,10 @@ public class GetForecastingStepDef extends BaseForecastingStepDef {
 
     @Given("^a payload with (\\d+) weeks and \"([^\"]*)\" as line number number$")
     public void aPayloadWithTheFollowingWeeksAndLineNumber(int weeks, String lineNumber) throws Throwable {
-        request = UriComponentsBuilder.fromUriString(ENDPOINT).pathSegment(weeks + "")
-                .path(lineNumber)
+        request = UriComponentsBuilder.fromUriString(ENDPOINT)
+                .pathSegment(weeks + "")
+                .pathSegment("lineNumber")
+                .pathSegment(lineNumber)
                 .build().toUri();
     }
 

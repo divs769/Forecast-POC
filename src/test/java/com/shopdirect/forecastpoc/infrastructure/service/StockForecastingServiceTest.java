@@ -2,8 +2,10 @@ package com.shopdirect.forecastpoc.infrastructure.service;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
+import com.shopdirect.forecastpoc.infrastructure.dao.ProductsAndCategoriesDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
+import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,13 +14,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -34,12 +32,15 @@ public class StockForecastingServiceTest {
     @Mock
     private ProductStockDao productStockDao;
 
+    @Mock
+    private ProductsAndCategoriesDao productsAndCategoriesDao;
+
     @Captor
     private ArgumentCaptor<Map<String, AttributeValue>> captor;
 
     @Before
     public void setUp() throws Exception {
-        stockForecastingService = new StockForecastingService(productStockDao);
+        stockForecastingService = new StockForecastingService(productStockDao, productsAndCategoriesDao);
     }
 
     @Test
@@ -219,18 +220,82 @@ public class StockForecastingServiceTest {
         compareForecastingResult(result2, results.get(1));
     }
 
-    private void compareForecastingResult(ForecastingModelResult expected, ForecastingModelResult actual){
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getForecastedValues().size(), actual.getForecastedValues().size());
-        for(int i = 0; i < expected.getForecastedValues().size(); i++){
-            compareProductStock(expected.getForecastedValues().get(i), actual.getForecastedValues().get(i));
+    @Test
+    public void testProductsForecasting(){
+        String product = "shirts";
+        List<String> lineNumbers = Arrays.asList("LN1", "LN2", "LN3");
+        Map<String, List<ProductStockData>> mockedData = mockDataDaos(product, lineNumbers);
+        ForecastingResult result = stockForecastingService.getForecastings(1, ProductHierarchy.PRODUCT, product);
+        List<ProductStockData> expectedHistoricData = Arrays.asList(
+                new ProductStockData(initialDate,
+                        mockedData.get("LN1").get(0).getStockValue() +
+                                mockedData.get("LN2").get(0).getStockValue() +
+                                mockedData.get("LN3").get(0).getStockValue(), null),
+                new ProductStockData(initialDate.plusWeeks(1),
+                                mockedData.get("LN2").get(1).getStockValue() +
+                                mockedData.get("LN3").get(1).getStockValue(), null),
+                new ProductStockData(initialDate.plusWeeks(2),
+                                mockedData.get("LN3").get(2).getStockValue(), null)
+        );
+        assertEquals(expectedHistoricData.size(), result.getHistoricData().size());
+        for(int i = 0; i < expectedHistoricData.size(); i++){
+            compareProductStock(expectedHistoricData.get(i), result.getHistoricData().get(i));
         }
+        List<ForecastingModelResult> results = result.getForecastings();
+        assertEquals(2, results.size());
+        ForecastingModelResult result1 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), expectedHistoricData.get(0).getStockValue(), null),
+                new ProductStockData(initialDate.plusDays(14),
+                        Math.round((expectedHistoricData.get(0).getStockValue() +
+                                expectedHistoricData.get(1).getStockValue()) / 2), null),
+                new ProductStockData(initialDate.plusDays(21),
+                        Math.round(expectedHistoricData.stream()
+                                .map(obj -> obj.getStockValue())
+                                .mapToLong(num -> num)
+                                .average().getAsDouble()), null)), null, "average");
+        ForecastingModelResult result2 = new ForecastingModelResult(Arrays.asList(
+                new ProductStockData(initialDate.plusDays(7), expectedHistoricData.get(0).getStockValue(), null),
+                new ProductStockData(initialDate.plusDays(14), expectedHistoricData.get(1).getStockValue(), null),
+                new ProductStockData(initialDate.plusDays(21), expectedHistoricData.get(2).getStockValue(), null)
+        ), null, "naive");
+
+        compareForecastingResultIgnoringError(result1, results.get(0));
+        compareForecastingResultIgnoringError(result2, results.get(1));
+    }
+
+    private Map<String, List<ProductStockData>> mockDataDaos(String product, List<String> lineNumbers) {
+        when(productsAndCategoriesDao.getLineNumbersByProduct(product))
+                .thenReturn(lineNumbers.stream());
+        Map<String, List<ProductStockData>> mockedData = new HashMap<>();
+        for(int i = 0; i < lineNumbers.size(); i++){
+            String lineNumber = lineNumbers.get(i);
+            List<ProductStockData> mockedProducts = new ArrayList<>();
+            for(int j = 0; j < i + 1; j++){
+                mockedProducts.add(new ProductStockData(initialDate.plusWeeks(j), 10 * (i + j + 1)));
+            }
+            when(productStockDao.getByLineNumber(lineNumber))
+                    .thenReturn(mockedProducts);
+            mockedData.put(lineNumber, mockedProducts);
+        }
+        return mockedData;
+    }
+
+    private void compareForecastingResult(ForecastingModelResult expected, ForecastingModelResult actual){
+        compareForecastingResultIgnoringError(expected, actual);
         if(expected.getError() != null){
             assertEquals(expected.getError(), actual.getError(), 0.001);
         }else{
             assertEquals(expected.getError(), actual.getError());
         }
 
+    }
+
+    private void compareForecastingResultIgnoringError(ForecastingModelResult expected, ForecastingModelResult actual) {
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getForecastedValues().size(), actual.getForecastedValues().size());
+        for(int i = 0; i < expected.getForecastedValues().size(); i++){
+            compareProductStock(expected.getForecastedValues().get(i), actual.getForecastedValues().get(i));
+        }
     }
 
     private void compareProductStock(ProductStockData expected, ProductStockData actual){

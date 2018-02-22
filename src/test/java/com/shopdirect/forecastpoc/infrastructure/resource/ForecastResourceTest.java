@@ -2,6 +2,7 @@ package com.shopdirect.forecastpoc.infrastructure.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
+import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.junit.Test;
@@ -39,17 +40,17 @@ public class ForecastResourceTest {
 
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeks() throws Exception {
-        mvc.perform(get("/forecast/1/8M417")).andExpect(status().isOk());
+        mvc.perform(get("/forecast/1/lineNumber/8M417")).andExpect(status().isOk());
 
-        verify(service).getForecastings(1, "8M417");
+        verify(service).getForecastings(1, ProductHierarchy.LINE_NUMBER,"8M417");
     }
 
     @Test
     public void shouldReturnForecastResultWhenGetCalledWithWeeksAnd() throws Exception {
         LocalDate date = LocalDate.now();
-        mvc.perform(get("/forecast/1/8M417/" + date.toString())).andExpect(status().isOk());
+        mvc.perform(get("/forecast/1/lineNumber/8M417/" + date.toString())).andExpect(status().isOk());
 
-        verify(service).getForecastings(1, "8M417", date);
+        verify(service).getForecastings(1, ProductHierarchy.LINE_NUMBER,"8M417", date);
     }
 
     @Test

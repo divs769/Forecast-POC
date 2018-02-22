@@ -4,8 +4,10 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
+import com.shopdirect.forecastpoc.infrastructure.dao.ProductsAndCategoriesDao;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
+import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
 import com.shopdirect.forecastpoc.infrastructure.util.TriFunction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +25,14 @@ import static java.util.stream.Collectors.toMap;
 public class StockForecastingService {
 
     private final ProductStockDao productStockDao;
+    private final ProductsAndCategoriesDao productsAndCategoriesDao;
     private Map<String, TriFunction<Stream<ProductStockData>, Stream<LocalDate>, String, Stream<ProductStockData>>> forecastingMethods;
 
     @Autowired
-    public StockForecastingService(ProductStockDao productStockDao) {
+    public StockForecastingService(ProductStockDao productStockDao
+            , ProductsAndCategoriesDao productAndCategoriesDao) {
         this.productStockDao = productStockDao;
+        this.productsAndCategoriesDao = productAndCategoriesDao;
         this.forecastingMethods = new HashMap<>();
         forecastingMethods.put("naive", StockForecastingModels::naivePrediction);
         forecastingMethods.put("average", StockForecastingModels::averagePrediction);
@@ -38,8 +43,14 @@ public class StockForecastingService {
     }
 
     public ForecastingResult getForecastings(int numWeeks, String lineNumber, LocalDate startDate) {
-        List<ProductStockData> fullProductStockData =  Lists.newArrayList(productStockDao.getByLineNumber(lineNumber)).stream()
-                .sorted(Comparator.comparing(ProductStockData::getDate)).collect(Collectors.toList());
+        return getForecastings(numWeeks, ProductHierarchy.LINE_NUMBER, lineNumber, startDate);
+    }
+    public ForecastingResult getForecastings(int numWeeks, ProductHierarchy type, String hierarchyValue) {
+        return getForecastings(numWeeks, type, hierarchyValue, null);
+    }
+
+    public ForecastingResult getForecastings(int numWeeks, ProductHierarchy type, String hierarchyValue, LocalDate startDate) {
+        List<ProductStockData> fullProductStockData = getProductStockData(type, hierarchyValue);
 
         if(fullProductStockData == null || fullProductStockData.isEmpty()){
             return new ForecastingResult(Arrays.asList(), fullProductStockData);
@@ -63,6 +74,37 @@ public class StockForecastingService {
          }
 
         return new ForecastingResult(forecastings, filterByStartDate(startDate, fullProductStockData) );
+    }
+
+    private List<ProductStockData> getProductStockData(ProductHierarchy type, String hierarchyValue) {
+        List<ProductStockData> products = null;
+        if(type == ProductHierarchy.LINE_NUMBER){
+            products = getByLineNumber(hierarchyValue).collect(Collectors.toList());
+        }else if(type == ProductHierarchy.CATEGORY || type == ProductHierarchy.PRODUCT){
+            Stream<String> lineNumbers;
+            if(type == ProductHierarchy.CATEGORY){
+                lineNumbers = productsAndCategoriesDao.getLineNumbersByCategory(hierarchyValue);
+            }else{
+                lineNumbers = productsAndCategoriesDao.getLineNumbersByProduct(hierarchyValue);
+            }
+            Map<LocalDate, Long> map = lineNumbers.map(lineNumber -> getByLineNumber(lineNumber))
+                    .flatMap(listProductStock -> listProductStock)
+                    .collect(Collectors.groupingBy(ProductStockData::getDate,
+                            Collectors.summingLong(ProductStockData::getStockValue)));
+            products = map.entrySet().stream()
+                    .map(mapping ->
+                        new ProductStockData(mapping.getKey(), mapping.getValue(), null)
+                    )
+                    .sorted(Comparator.comparing(ProductStockData::getDate))
+                    .collect(Collectors.toList());
+        }
+        return products;
+
+    }
+
+    private Stream<ProductStockData> getByLineNumber(String hierarchyValue) {
+        return Lists.newArrayList(productStockDao.getByLineNumber(hierarchyValue)).stream()
+                .sorted(Comparator.comparing(ProductStockData::getDate));
     }
 
     private List<ProductStockData> filterByStartDate(LocalDate startDate, List<ProductStockData> products){
