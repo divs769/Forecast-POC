@@ -1,17 +1,19 @@
 
 var modelData = [];
 var salesData =[];
-
-function loadBackEndData(callback,weeks,lineNumber, startDate){
+var hierarchyTypes = {"lineNumber": "line number", "product" : "product name" , "category" : "category name"}
+function loadBackEndData(callback,weeks,hierarchyValue, startDate, hierarchyType){
     var datePath = ""
-    if(startDate !== ""){
-        var splittedDate = startDate.split("/")
-        if(splittedDate.length == 3){
-            datePath += "/" + splittedDate.reverse().join("-")
+    if(hierarchyValue == ""){
+        alert("Please enter the "+hierarchyTypes[hierarchyType])
+    }else{
+         if(startDate !== ""){
+            var splittedDate = startDate.split("/")
+            if(splittedDate.length == 3){
+                datePath += "/" + splittedDate.reverse().join("-")
+            }
         }
-    }
-    $.ajax(
-    {
+        $.ajax({
         dataType: 'json',
         headers: {
             'X-Hello': 'World',
@@ -19,7 +21,7 @@ function loadBackEndData(callback,weeks,lineNumber, startDate){
             "Access-Control-Allow-Origin": "*"
         },
         type:'GET',
-        url:'http://localhost:8080/forecast/'+weeks+'/'+lineNumber+datePath,
+        url:'http://localhost:8080/forecast/'+weeks+'/'+hierarchyType+'/'+hierarchyValue+datePath,
         success: function(data)
         {
             console.log(data)
@@ -56,6 +58,7 @@ function loadBackEndData(callback,weeks,lineNumber, startDate){
             alert("error");
         }
     });
+    }
 }
     function getSalesData(){
         return salesData;
@@ -63,6 +66,10 @@ function loadBackEndData(callback,weeks,lineNumber, startDate){
 
 function getNewDate(date){
     return new Date(date[0], date[1] - 1, date[2]);
+}
+
+function getHierarchyValue(id){
+    return hierarchyTypes[id]
 }
 
 function getAvailableModels(){
