@@ -15,6 +15,8 @@ public class ForecastingModelResult {
         this.name = name;
     }
 
+    public ForecastingModelResult(){}
+    
     public List<ProductStockData> getForecastedValues() {
         return forecastedValues;
     }

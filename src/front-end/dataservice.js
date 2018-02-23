@@ -1,60 +1,91 @@
 
-var model1 = {
-    id: "1",
-    name: "Model 1",
-    timeFrame: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017'],
-    values: [
-        {
-            name: 'Forecast 2018',
-            data: [17.0, 26.9,19.5, 24.5, 38.4, 11.5,25.2, 46.5, 53.3, 28.3, 33.9, 19.6]
-        },
-        {
-            name: 'Sales 2017',
-            data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+var modelData = [];
+var salesData =[];
+var hierarchyTypes = {"lineNumber": "line number", "product" : "product name" , "category" : "category name"}
+function loadBackEndData(callback,weeks,hierarchyValue, startDate, hierarchyType){
+    var datePath = ""
+    if(hierarchyValue == ""){
+        alert("Please enter the "+hierarchyTypes[hierarchyType])
+    }else{
+         if(startDate !== ""){
+            var splittedDate = startDate.split("/")
+            if(splittedDate.length == 3){
+                datePath += "/" + splittedDate.reverse().join("-")
+            }
         }
-    ],
-    accuracy: 83
-};
+        $.ajax({
+        dataType: 'json',
+        headers: {
+            'X-Hello': 'World',
+            Accept:"application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        type:'GET',
+        url:'http://localhost:8080/forecast/'+weeks+'/'+hierarchyType+'/'+hierarchyValue+datePath,
+        success: function(data)
+        {
+            console.log(data)
+            modelData.length = data.forecastings.length
+            for (i = 0; i < data.forecastings.length; i++) { 
+                var forecastingList = [];
+                var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
+                    for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
+                        forecastingList.push({x: getNewDate(data.forecastings[i].forecastedValues[x].date), 
+                            y: data.forecastings[i].forecastedValues[x].stockValue});
+                    }
+                modelData[i] = {id: i+1, name: data.forecastings[i].name,
+                    error: data.forecastings[i].error,
+                    values:forecastingList
+               };
+             
+            }
+            var historyDataList = [];
+            for(j=0;j<data.historicData.length;j++){
+                    historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stockValue});
+            }
+            if(historyDataList.length > 0){
+                salesData[0] = {id: i+1, name: 'Sales Data',
+                    values:historyDataList};
+            }else{
+                salesData.length = 0
+            }
+            
+                    
+           callback();
+        },
+        error: function(data)
+        {
+            alert("error");
+        }
+    });
+    }
+}
+    function getSalesData(){
+        return salesData;
+    }
 
-var model2 = {
-    id: "2",
-    name: "Model 2",
-    timeFrame: ['Jan/2017', 'Feb/2017', 'Mar/2017', 'Apr/2017', 'May/2017', 'Jun/2017', 'Jul/2017', 'Aug/2017', 'Sep/2017', 'Oct/2017', 'Nov/2017', 'Dec/2017'],
-    values: [
-                {
-                    name: 'Forecast 2018',
-                    data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-                },
-                {
-                    name: 'Sales 2017',
-                    data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-                }
-            ],
-    accuracy: 20
-};
+function getNewDate(date){
+    return new Date(date[0], date[1] - 1, date[2]);
+}
 
-var modelData = [model1, model2];
+function getHierarchyValue(id){
+    return hierarchyTypes[id]
+}
 
 function getAvailableModels(){
-    var modelList = [];
-    for (i = 0; i < modelData.length; i++) {
-        modelList.push({id: modelData[i].id, name: modelData[i].name});
-    }
-    return modelList;
+   return modelData;
 } 
-
-function getModel(id) {
-    var modelDetailsList = [];
-    console.log(id);
+function getModel(names) {
+    /*var modelDetailsList = [];
     for (i = 0; i < modelData.length; i++) {
-        for (x = 0; x < id.length; x++) {
-            console.log("Comparing models ", modelData[i].id, id[x])
-            if (modelData[i].id === id[x]) {
-                console.log("Adding model")
+        for (x = 0; x < names.length; x++) {
+            console.log("Comparing models ", modelData[i].name, names[x])
+            if (modelData[i].name === names[x]) {
                 modelDetailsList.push(modelData[i]);
             }
         }
     }
     console.log("Model Details List", modelDetailsList)
-    return modelDetailsList;
+    return modelDetailsList;*/
+    return modelData.filter(modelElem => names.indexOf(modelElem.name) !== -1)
 }
