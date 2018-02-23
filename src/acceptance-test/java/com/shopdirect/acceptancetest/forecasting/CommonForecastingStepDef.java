@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.shopdirect.acceptancetest.LatestResponse;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.model.LineStockData;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -37,7 +37,7 @@ public class CommonForecastingStepDef extends BaseForecastingStepDef {
 
     @After
     public void cleanupTable() throws Exception {
-        List<ProductStockData> scanResult = dynamoDBMapper.scan(ProductStockData.class, new DynamoDBScanExpression());
+        List<LineStockData> scanResult = dynamoDBMapper.scan(LineStockData.class, new DynamoDBScanExpression());
         List<DynamoDBMapper.FailedBatch> failedBatchList = dynamoDBMapper.batchDelete(scanResult);
         System.out.println("-----> FAILED BATCH: " + failedBatchList);
     }

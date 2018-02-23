@@ -1,6 +1,6 @@
 package com.shopdirect.forecastpoc.infrastructure.service;
 
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.model.StockDataItem;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,89 +25,89 @@ public class StockForecastingModelsTest {
 
     @Test
     public void testNaivePrediction(){
-        Stream<ProductStockData> result = StockForecastingModels.naivePrediction(Stream.of(
-                new ProductStockData(d7, 15),
-                new ProductStockData(d5, 25),
-                new ProductStockData(d6, 20)
+        Stream<StockDataItem> result = StockForecastingModels.naivePrediction(Stream.of(
+                new StockDataItem(d7, 15),
+                new StockDataItem(d5, 25),
+                new StockDataItem(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4), "8M417");
-        List<ProductStockData> productStockData = result.collect(toList());
+        ), Stream.of(d1, d2, d3, d4));
+        List<StockDataItem> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
-        compareProductStock(new ProductStockData(d1, 15),
+        compareProductStock(new StockDataItem(d1, 15),
                 productStockData.get(0));
-        compareProductStock(new ProductStockData(d2, 15),
+        compareProductStock(new StockDataItem(d2, 15),
                 productStockData.get(1));
-        compareProductStock(new ProductStockData(d3, 15),
+        compareProductStock(new StockDataItem(d3, 15),
                 productStockData.get(2));
-        compareProductStock(new ProductStockData(d4, 15),
+        compareProductStock(new StockDataItem(d4, 15),
                 productStockData.get(3));
     }
 
     @Test
     public void testIntResultAverage(){
-        Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(d5, 15),
-                new ProductStockData(d7, 25),
-                new ProductStockData(d6, 20)
+        Stream<StockDataItem> result = StockForecastingModels.averagePrediction(Stream.of(
+                new StockDataItem(d5, 15),
+                new StockDataItem(d7, 25),
+                new StockDataItem(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4), "8M417");
+        ), Stream.of(d1, d2, d3, d4));
 
-        List<ProductStockData> productStockData = result.collect(toList());
+        List<StockDataItem> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
-        compareProductStock(new ProductStockData(d1, 20),
+        compareProductStock(new StockDataItem(d1, 20),
                 productStockData.get(0));
-        compareProductStock(new ProductStockData(d2, 20),
+        compareProductStock(new StockDataItem(d2, 20),
                 productStockData.get(1));
-        compareProductStock(new ProductStockData(d3, 20),
+        compareProductStock(new StockDataItem(d3, 20),
                 productStockData.get(2));
-        compareProductStock(new ProductStockData(d4, 20),
+        compareProductStock(new StockDataItem(d4, 20),
                 productStockData.get(3));
     }
 
     @Test
     public void testLowerRoundingAverage(){
-        Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(d7, 10),
-                new ProductStockData(d6, 10),
-                new ProductStockData(d5, 20)
+        Stream<StockDataItem> result = StockForecastingModels.averagePrediction(Stream.of(
+                new StockDataItem(d7, 10),
+                new StockDataItem(d6, 10),
+                new StockDataItem(d5, 20)
 
-        ), Stream.of(d1, d2, d3, d4), "8M417");
+        ), Stream.of(d1, d2, d3, d4));
 
-        List<ProductStockData> productStockData = result.collect(toList());
+        List<StockDataItem> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
-        compareProductStock(new ProductStockData(d1, 13),
+        compareProductStock(new StockDataItem(d1, 13),
                 productStockData.get(0));
-        compareProductStock(new ProductStockData(d2, 13),
+        compareProductStock(new StockDataItem(d2, 13),
                 productStockData.get(1));
-        compareProductStock(new ProductStockData(d3, 13),
+        compareProductStock(new StockDataItem(d3, 13),
                 productStockData.get(2));
-        compareProductStock(new ProductStockData(d4, 13),
+        compareProductStock(new StockDataItem(d4, 13),
                 productStockData.get(3));
     }
 
     @Test
     public void testUpperRoundingAverage(){
-        Stream<ProductStockData> result = StockForecastingModels.averagePrediction(Stream.of(
-                new ProductStockData(d7, 11),
-                new ProductStockData(d5, 10),
-                new ProductStockData(d6, 20)
+        Stream<StockDataItem> result = StockForecastingModels.averagePrediction(Stream.of(
+                new StockDataItem(d7, 11),
+                new StockDataItem(d5, 10),
+                new StockDataItem(d6, 20)
 
-        ), Stream.of(d1, d2, d3, d4), "8M417");
+        ), Stream.of(d1, d2, d3, d4));
 
-        List<ProductStockData> productStockData = result.collect(toList());
+        List<StockDataItem> productStockData = result.collect(toList());
         Assert.assertEquals(4, productStockData.size());
-        compareProductStock(new ProductStockData(d1, 14),
+        compareProductStock(new StockDataItem(d1, 14),
                 productStockData.get(0));
-        compareProductStock(new ProductStockData(d2, 14),
+        compareProductStock(new StockDataItem(d2, 14),
                 productStockData.get(1));
-        compareProductStock(new ProductStockData(d3, 14),
+        compareProductStock(new StockDataItem(d3, 14),
                 productStockData.get(2));
-        compareProductStock(new ProductStockData(d4, 14),
+        compareProductStock(new StockDataItem(d4, 14),
                 productStockData.get(3));
     }
 
-    private void compareProductStock(ProductStockData expected, ProductStockData actual){
+    private void compareProductStock(StockDataItem expected, StockDataItem actual){
         Assert.assertEquals(expected.getDate(), actual.getDate());
-        Assert.assertEquals(expected.getStockValue(), actual.getStockValue());
+        Assert.assertEquals(expected.getStock(), actual.getStock());
     }
 }

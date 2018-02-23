@@ -31,7 +31,7 @@ function loadBackEndData(callback,weeks,hierarchyValue, startDate, hierarchyType
                 var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
                     for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
                         forecastingList.push({x: getNewDate(data.forecastings[i].forecastedValues[x].date), 
-                            y: data.forecastings[i].forecastedValues[x].stockValue});
+                            y: data.forecastings[i].forecastedValues[x].stock});
                     }
                 modelData[i] = {id: i+1, name: data.forecastings[i].name,
                     error: data.forecastings[i].error,
@@ -41,7 +41,7 @@ function loadBackEndData(callback,weeks,hierarchyValue, startDate, hierarchyType
             }
             var historyDataList = [];
             for(j=0;j<data.historicData.length;j++){
-                    historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stockValue});
+                    historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stock});
             }
             if(historyDataList.length > 0){
                 salesData[0] = {id: i+1, name: 'Sales Data',

@@ -2,7 +2,7 @@ package com.shopdirect.forecastpoc.infrastructure.resource;
 
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.model.LineStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -39,7 +39,7 @@ public class ForecastResource {
     }
 
     @RequestMapping(method = POST)
-    public void saveHistoricData(@RequestBody ProductStockData data) {
+    public void saveHistoricData(@RequestBody LineStockData data) {
         service.saveStockData(data);
     }
 }

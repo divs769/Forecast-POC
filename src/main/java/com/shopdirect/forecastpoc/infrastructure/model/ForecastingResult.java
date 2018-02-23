@@ -5,10 +5,10 @@ import java.util.List;
 public class ForecastingResult {
     private List<ForecastingModelResult> forecastings;
 
-    private List<ProductStockData> historicData;
+    private List<StockDataItem> historicData;
 
     public ForecastingResult(List<ForecastingModelResult> forecastings,
-                             List<ProductStockData> historicData) {
+                             List<StockDataItem> historicData) {
         this.forecastings = forecastings;
         this.historicData = historicData;
     }
@@ -19,7 +19,7 @@ public class ForecastingResult {
         return forecastings;
     }
 
-    public List<ProductStockData> getHistoricData() {
+    public List<StockDataItem> getHistoricData() {
         return historicData;
     }
 }

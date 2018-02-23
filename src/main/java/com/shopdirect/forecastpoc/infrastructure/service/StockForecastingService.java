@@ -3,13 +3,10 @@ package com.shopdirect.forecastpoc.infrastructure.service;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.shopdirect.forecastpoc.infrastructure.dao.ProductStockDao;
+import com.shopdirect.forecastpoc.infrastructure.dao.LineStockDao;
 import com.shopdirect.forecastpoc.infrastructure.dao.ProductsAndCategoriesDao;
-import com.shopdirect.forecastpoc.infrastructure.model.ForecastingModelResult;
-import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
-import com.shopdirect.forecastpoc.infrastructure.util.TriFunction;
+import com.shopdirect.forecastpoc.infrastructure.model.*;
+import java.util.function.BiFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +20,14 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class StockForecastingService {
-    private final ProductStockDao productStockDao;
+    private final LineStockDao lineStockDao;
     private final ProductsAndCategoriesDao productsAndCategoriesDao;
-    private Map<String, TriFunction<Stream<ProductStockData>, Stream<LocalDate>, String, Stream<ProductStockData>>> forecastingMethods;
+    private Map<String, BiFunction<Stream<StockDataItem>, Stream<LocalDate>, Stream<StockDataItem>>> forecastingMethods;
 
     @Autowired
-    public StockForecastingService(ProductStockDao productStockDao
+    public StockForecastingService(LineStockDao lineStockDao
             , ProductsAndCategoriesDao productAndCategoriesDao) {
-        this.productStockDao = productStockDao;
+        this.lineStockDao = lineStockDao;
         this.productsAndCategoriesDao = productAndCategoriesDao;
         this.forecastingMethods = new HashMap<>();
         forecastingMethods.put("naive", StockForecastingModels::naivePrediction);
@@ -49,7 +46,7 @@ public class StockForecastingService {
     }
 
     public ForecastingResult getForecastings(int numWeeks, ProductHierarchy type, String hierarchyValue, LocalDate startDate) {
-        List<ProductStockData> fullProductStockData = getProductStockData(type, hierarchyValue);
+        List<StockDataItem> fullProductStockData = getProductStockData(type, hierarchyValue);
 
         if(fullProductStockData == null || fullProductStockData.isEmpty()){
             return new ForecastingResult(Arrays.asList(), fullProductStockData);
@@ -60,8 +57,8 @@ public class StockForecastingService {
                 .collect(Collectors.toList());
 
          for(String name : forecastingMethods.keySet()){
-             Stream<ProductStockData> newForecastings = forecastingMethods.get(name)
-                     .apply(fullProductStockData.stream(), nextDates.stream(), fullProductStockData.get(0).getLineNumber());
+             Stream<StockDataItem> newForecastings = forecastingMethods.get(name)
+                     .apply(fullProductStockData.stream(), nextDates.stream());
 
              forecastings.stream()
                      .filter(forecastingResult -> forecastingResult.getName().equals(name))
@@ -75,8 +72,8 @@ public class StockForecastingService {
         return new ForecastingResult(forecastings, filterByStartDate(startDate, fullProductStockData) );
     }
 
-    private List<ProductStockData> getProductStockData(ProductHierarchy type, String hierarchyValue) {
-        List<ProductStockData> products = null;
+    private List<StockDataItem> getProductStockData(ProductHierarchy type, String hierarchyValue) {
+        List<StockDataItem> products = null;
         if(type == ProductHierarchy.LINE_NUMBER){
             products = getByLineNumber(hierarchyValue).collect(Collectors.toList());
         }else if(type == ProductHierarchy.CATEGORY || type == ProductHierarchy.PRODUCT){
@@ -88,25 +85,26 @@ public class StockForecastingService {
             }
             Map<LocalDate, Long> map = lineNumbers.map(lineNumber -> getByLineNumber(lineNumber))
                     .flatMap(listProductStock -> listProductStock)
-                    .collect(Collectors.groupingBy(ProductStockData::getDate,
-                            Collectors.summingLong(ProductStockData::getStockValue)));
+                    .collect(Collectors.groupingBy(StockDataItem::getDate,
+                            Collectors.summingLong(StockDataItem::getStock)));
             products = map.entrySet().stream()
                     .map(mapping ->
-                        new ProductStockData(mapping.getKey(), mapping.getValue(), null)
+                        new StockDataItem(mapping.getKey(), mapping.getValue())
                     )
-                    .sorted(Comparator.comparing(ProductStockData::getDate))
+                    .sorted(Comparator.comparing(StockDataItem::getDate))
                     .collect(Collectors.toList());
         }
         return products;
 
     }
 
-    private Stream<ProductStockData> getByLineNumber(String hierarchyValue) {
-        return Lists.newArrayList(productStockDao.getByLineNumber(hierarchyValue)).stream()
-                .sorted(Comparator.comparing(ProductStockData::getDate));
+    private Stream<StockDataItem> getByLineNumber(String hierarchyValue) {
+        return Lists.newArrayList(lineStockDao.getByLineNumber(hierarchyValue)).stream()
+                .map(prod -> new StockDataItem(prod.getDate(), prod.getStockValue()))
+                .sorted(Comparator.comparing(StockDataItem::getDate));
     }
 
-    private List<ProductStockData> filterByStartDate(LocalDate startDate, List<ProductStockData> products){
+    private List<StockDataItem> filterByStartDate(LocalDate startDate, List<StockDataItem> products){
         if(startDate != null){
             return products.stream()
                     .filter(prod -> prod.getDate().compareTo(startDate) >= 0)
@@ -120,11 +118,11 @@ public class StockForecastingService {
     -should get past forecasting values from a db in the future
     -For now, it recalculates the whole forecasting history
     */
-    private Map<String, List<ProductStockData>> getPastForecastings(List<ProductStockData> fullProductStockData, LocalDate startDate){
-        Stream<ProductStockData> forecasting, forecastings;
+    private Map<String, List<StockDataItem>> getPastForecastings(List<StockDataItem> fullProductStockData, LocalDate startDate){
+        Stream<StockDataItem> forecasting, forecastings;
         LocalDate date;
         int productsBeforeStartDate = 1;
-        Map<String, List<ProductStockData>> result = new HashMap<>();
+        Map<String, List<StockDataItem>> result = new HashMap<>();
         if(startDate != null){
             productsBeforeStartDate = (int) fullProductStockData.stream().filter(prod -> prod.getDate().isBefore(startDate)).count();
         }
@@ -134,8 +132,7 @@ public class StockForecastingService {
                 date = fullProductStockData.get(i).getDate();
                 forecasting = forecastingMethods.get(name)
                         .apply(fullProductStockData.stream().limit(i),
-                        Stream.of(date),
-                        fullProductStockData.get(i).getLineNumber());
+                        Stream.of(date));
                 forecastings = Stream.concat(forecastings, forecasting);
             }
             result.put(name, forecastings.collect(Collectors.toList()));
@@ -143,13 +140,13 @@ public class StockForecastingService {
         return result;
     }
 
-    public List<ForecastingModelResult> calculatePastForecastings(List<ProductStockData> fullProductStockData, LocalDate startDate){
-        Map<LocalDate, ProductStockData> actualValues = fullProductStockData.stream().collect(toMap(ProductStockData::getDate, prod -> prod));
+    public List<ForecastingModelResult> calculatePastForecastings(List<StockDataItem> fullProductStockData, LocalDate startDate){
+        Map<LocalDate, StockDataItem> actualValues = fullProductStockData.stream().collect(toMap(StockDataItem::getDate, prod -> prod));
 
-        Map<String, List<ProductStockData>> pastForecastings = getPastForecastings(fullProductStockData, startDate);
+        Map<String, List<StockDataItem>> pastForecastings = getPastForecastings(fullProductStockData, startDate);
         return pastForecastings.entrySet().stream()
                 .map(map -> {
-                    List<ProductStockData> forecastings = map.getValue();
+                    List<StockDataItem> forecastings = map.getValue();
                     Double error = calculateError(forecastings, actualValues);
                     return new ForecastingModelResult(forecastings, error, map.getKey());
                 })
@@ -157,7 +154,7 @@ public class StockForecastingService {
                 .collect(Collectors.toList());
     }
 
-    private static Stream<LocalDate> getNextWeekDates(int numberWeeks, ProductStockData lastStockData, LocalDate startDate){
+    private static Stream<LocalDate> getNextWeekDates(int numberWeeks, StockDataItem lastStockData, LocalDate startDate){
         LocalDate firstDate;
         if(startDate == null
                 || startDate.isBefore(lastStockData.getDate())){
@@ -171,18 +168,18 @@ public class StockForecastingService {
                 .limit(numberWeeks);
     }
 
-    private Double calculateError(List<ProductStockData> forecastedValues, Map<LocalDate, ProductStockData> actualValues){
+    private Double calculateError(List<StockDataItem> forecastedValues, Map<LocalDate, StockDataItem> actualValues){
         OptionalDouble error = forecastedValues.stream().map(prod ->
-                ((double) Math.abs(prod.getStockValue() - actualValues.get(prod.getDate()).getStockValue()))
-                            / (1 + actualValues.get(prod.getDate()).getStockValue()))
+                ((double) Math.abs(prod.getStock() - actualValues.get(prod.getDate()).getStock()))
+                            / (1 + actualValues.get(prod.getDate()).getStock()))
                 .mapToDouble(elem -> elem)
                 .average();
 
         return error.isPresent() ? 100 * error.getAsDouble() : null;
     }
 
-    public void saveStockData(ProductStockData data) {
-        productStockDao.saveItem(ImmutableMap.<String, AttributeValue>builder()
+    public void saveStockData(LineStockData data) {
+        lineStockDao.saveItem(ImmutableMap.<String, AttributeValue>builder()
                 .put("lineNumber", new AttributeValue(data.getLineNumber()))
                 .put("date", new AttributeValue(data.getDate().toString()))
                 .put("stock", new AttributeValue().withN(String.valueOf(data.getStockValue())))

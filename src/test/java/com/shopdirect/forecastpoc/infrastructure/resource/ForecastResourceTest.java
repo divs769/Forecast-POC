@@ -3,7 +3,7 @@ package com.shopdirect.forecastpoc.infrastructure.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopdirect.forecastpoc.infrastructure.model.ForecastingResult;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.model.LineStockData;
 import com.shopdirect.forecastpoc.infrastructure.service.StockForecastingService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,12 +55,12 @@ public class ForecastResourceTest {
 
     @Test
     public void shouldSaveStockData() throws Exception {
-        ProductStockData data = new ProductStockData(LocalDate.now(), 100L);
+        LineStockData data = new LineStockData(LocalDate.now(), 100L);
         mvc.perform(post("/forecast")
                 .content(mapper.writeValueAsString(data))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(service).saveStockData(isA(ProductStockData.class));
+        verify(service).saveStockData(isA(LineStockData.class));
     }
 }

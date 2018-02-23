@@ -10,7 +10,7 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import com.shopdirect.acceptancetest.CucumberStepsDefinition;
 import com.shopdirect.acceptancetest.LatestResponse;
 import com.shopdirect.acceptancetest.configuration.TestResponseErrorHandler;
-import com.shopdirect.forecastpoc.infrastructure.model.ProductStockData;
+import com.shopdirect.forecastpoc.infrastructure.model.LineStockData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.client.RestTemplate;
@@ -77,12 +77,12 @@ public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
                         .withWriteCapacityUnits(1L));
     }
 
-    protected void addItem(ProductStockData productStockData) {
+    protected void addItem(LineStockData lineStockData) {
         Table table = db.getTable(STOCK_DATA_TB);
         Item item = new Item()
-                .withString("lineNumber", productStockData.getLineNumber())
-                .withString("date", productStockData.getDate().toString())
-                .withLong("stock", productStockData.getStockValue());
+                .withString("lineNumber", lineStockData.getLineNumber())
+                .withString("date", lineStockData.getDate().toString())
+                .withLong("stock", lineStockData.getStockValue());
         table.putItem(item);
     }
 }

@@ -9,7 +9,7 @@ import com.shopdirect.forecastpoc.infrastructure.model.converter.LocalDateConver
 import java.time.LocalDate;
 
 @DynamoDBTable(tableName = DynamoDBConfig.TABLE)
-public class ProductStockData {
+public class LineStockData {
     @DynamoDBAttribute
     @DynamoDBHashKey
     private String lineNumber;
@@ -20,21 +20,21 @@ public class ProductStockData {
     @DynamoDBAttribute
     private long stockValue;
 
-    public ProductStockData(LocalDate date, long stockValue) {
+    public LineStockData(LocalDate date, long stockValue) {
         this.date = date;
         this.stockValue = stockValue;
         this.lineNumber = "8M417";
     }
 
     @JsonCreator
-    public ProductStockData(@JsonProperty("date") LocalDate date, @JsonProperty("stock") long stockValue
+    public LineStockData(@JsonProperty("date") LocalDate date, @JsonProperty("stock") long stockValue
             , @JsonProperty("lineNumber") String lineNumber) {
         this.date = date;
         this.stockValue = stockValue;
         this.lineNumber = lineNumber;
     }
 
-    public ProductStockData() {}
+    public LineStockData() {}
 
     public LocalDate getDate() {
         return date;
