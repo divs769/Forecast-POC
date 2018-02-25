@@ -54,38 +54,18 @@ $(document).ready(function(){
 
   });
     var hierarchyType = "lineNumber";
-    $('.date').datepicker({
-      format: 'dd/mm/yyyy',
-      autoclose: true
-    });
-
+    
     $('#multiselect').multiselect({
            buttonWidth: '400px'
     });
 
-    $(document).on('click', '.number-spinner button', function () {    
-        var btn = $(this),
-          oldValue = btn.closest('.number-spinner').find('input').val().trim(),
-          newVal = 0;
-        
-        if (btn.attr('data-dir') == 'up') {
-          newVal = parseInt(oldValue) + 1;
-        } else {
-          if (oldValue > 1) {
-            newVal = parseInt(oldValue) - 1;
-          } else {
-            newVal = 1;
-          }
-        }
-        btn.closest('.number-spinner').find('input').val(newVal);
-    });
-
    
     $('#searchBtn').click(function(){
-        var weeks = $('.number-spinner button').closest('.number-spinner').find('input').val().trim();
-        var lineNumber = $('#header-searchInput').val();
+        var weeks = $('#weeksSpinner').val().trim();
+        var searchByValue = $('#searchByInput').val();
         var startDate = $("input[name='date']")[0].value
-        loadBackEndData(function() {
+        console.log(weeks, searchByValue, startDate)
+        loadBackEndData(weeks, searchByValue, startDate, hierarchyType, function() {
         var availableModels = getAvailableModels();
         var sales =getSalesData();
         if(availableModels.length > 0 || sales.length > 0){
@@ -109,7 +89,7 @@ $(document).ready(function(){
           alert("Sorry, "+getHierarchyValue(hierarchyType)+" not found.")
         }
   
-        },weeks,lineNumber,startDate,hierarchyType);
+        });
       });
     
     
@@ -144,6 +124,17 @@ $(document).ready(function(){
       hierarchyType = id
       $('#header-searchInput').attr('placeholder', "Enter the "+getHierarchyValue(id))
     });
+
+    //Initialize the Weeks spinner
+    $('.spinner .btn:first-of-type').on('click', function () {
+      $('.spinner input').val(parseInt($('.spinner input').val(), 10) + 1);
+    });
+    $('.spinner .btn:last-of-type').on('click', function () {
+        $('.spinner input').val(parseInt($('.spinner input').val(), 10) - 1);
+    });
+
+    // Initialize the model dropdown
+    $('#modelSelect').multiselect();
 });
 
 function refreshBtnFn(){
@@ -244,6 +235,87 @@ function refreshGraph(series) {
         '</div>')
       }
      
+  }
+
+  var modelData = [];
+  var salesData =[];
+  var hierarchyTypes = {"lineNumber": "line number", "product" : "product name" , "category" : "category name"}
+  
+  function loadBackEndData(weeks, hierarchyValue, startDate, hierarchyType, callback){
+      var datePath = ""
+      if(hierarchyValue == ""){
+          alert("Please enter the "+hierarchyTypes[hierarchyType])
+      }else{
+           if(startDate !== ""){
+              var splittedDate = startDate.split("/")
+              if(splittedDate.length == 3){
+                  datePath += "/" + splittedDate.reverse().join("-")
+              }
+          }
+          $.ajax({
+          dataType: 'json',
+          headers: {
+              'X-Hello': 'World',
+              Accept:"application/json",
+              "Access-Control-Allow-Origin": "*"
+          },
+          type:'GET',
+          url:'http://localhost:8080/forecast/'+weeks+'/'+hierarchyType+'/'+hierarchyValue+datePath,
+          success: function(data)
+          {
+              console.log(data)
+              modelData.length = data.forecastings.length
+              for (i = 0; i < data.forecastings.length; i++) { 
+                  var forecastingList = [];
+                  var foreCastingName = 'ForeCasting using '+data.forecastings[i].name;
+                      for(x=0; x < data.forecastings[i].forecastedValues.length; x++){
+                          forecastingList.push({x: getNewDate(data.forecastings[i].forecastedValues[x].date), 
+                              y: data.forecastings[i].forecastedValues[x].stock});
+                      }
+                  modelData[i] = {id: i+1, name: data.forecastings[i].name,
+                      error: data.forecastings[i].error,
+                      values:forecastingList
+                 };
+               
+              }
+              var historyDataList = [];
+              for(j=0;j<data.historicData.length;j++){
+                      historyDataList.push({x: getNewDate(data.historicData[j].date), y: data.historicData[j].stock});
+              }
+              if(historyDataList.length > 0){
+                  salesData[0] = {id: i+1, name: 'Sales Data',
+                      values:historyDataList};
+              }else{
+                  salesData.length = 0
+              }
+              
+                      
+             callback();
+          },
+          error: function(data)
+          {
+              alert("error");
+          }
+      });
+      }
+  }
+      function getSalesData(){
+          return salesData;
+      }
+  
+  function getNewDate(date){
+      return new Date(date[0], date[1] - 1, date[2]);
+  }
+  
+  function getHierarchyValue(id){
+      return hierarchyTypes[id]
+  }
+  
+  function getAvailableModels(){
+     return modelData;
+  } 
+  function getModel(names) {
+      return modelData.filter(modelElem => names.indexOf(modelElem.name) !== -1)
   }
 /*
   var gaugeOptions = {

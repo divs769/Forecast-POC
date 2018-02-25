@@ -1,0 +1,125 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+
+    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="js/bootstrap.min.js" />
+
+
+    <script src="js/forecast-poc-dataservice.js"></script>
+    <script src="js/forecast-poc.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"
+        type="text/css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"
+    />
+    <link rel="stylesheet" type="text/css" href="css/forecast-poc-styles.css" />
+</head>
+
+<body>
+    <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" />
+    <div class="container-fluid search-container">
+        <div class="page-header">
+            <h2>Forecasting Tool</h2>
+        </div>
+        <div class="row">
+
+            <form class="form-inline search-form">
+
+                <!-- Hierarchy Dropdown-->
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Search type</span>
+                    </div>
+                    <select id="searchTypeSelect" class="form-control mb-2 mr-sm-2 mb-sm-0">
+                        <option></option>
+                        <option value="lineNumber">Line number</option>
+                        <option value="product">Product</option>
+                        <option value="category">Category</option>
+                    </select>
+                </div>
+
+                <!-- Search input -->
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Search by</span>
+                    </div>
+                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="searchByInput" placeholder="Search by">
+                </div>
+
+                <!-- Start date input -->
+                <label class="sr-only" for="inlineFormInputGroup">Start date</label>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <span class="input-group-text" id="basic-addon1">Start date</span>
+                    </div>
+                    <input class="form-control text-box single-line mb-2 mr-sm-2 mb-sm-0" id="date" name="date" placeholder="Start date" type="date">
+                </div>
+
+                <!-- Weeks spinner -->
+                <label class="sr-only" for="inlineFormInputGroup">Weeks</label>
+                <div class="input-group spinner mb-2 mr-sm-2 mb-sm-0">
+                    <div class="input-group-addon">
+                        <span class="input-group-text" id="basic-addon1">Weeks</span>
+                    </div>
+                    <input id="weeksSpinner" name="weeksSpinner" type="text" class="form-control" value="3">
+                    <div class="input-group-btn-vertical">
+                        <button class="btn btn-default" type="button">
+                            <i class="fa fa-caret-up"></i>
+                        </button>
+                        <button class="btn btn-default" type="button">
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search button -->
+                <a id="searchBtn" class="btn btn-primary btn-md" style="margin-left: 30px" href="#">
+                    <i class="fa fa-search" aria-hidden="true"></i> Search
+                </a>
+                
+            </form>
+
+            
+            <!-- <div class="container-fluid"> -->
+
+                <!-- Models multiselect -->
+                <form class="form-inline" style="margin-left: 50px">
+                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                        <div class="input-group-addon">
+                            <span class="input-group-text" id="basic-addon1">Models</span>
+                        </div>
+                        <select id="modelSelect" class="form-control" multiple="multiple"></select>
+                    </div>
+
+                    <!-- Refresh button -->
+                    <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
+                        <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+                    </a>
+                </form>
+            <!-- </div> -->
+        </div>
+    </div>
+    <!-- End Search Container -->
+
+    <!-- Forecasting main chart -->
+    <div id="container"></div>
+
+    <!-- Error charts -->
+    <div id="containers" class="col align-self-center" style="display: flex;" />
+
+</body>
