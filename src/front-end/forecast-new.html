@@ -16,7 +16,6 @@
         crossorigin="anonymous"></script>
     <script src="js/bootstrap.min.js" />
 
-
     <script src="js/forecast-poc-dataservice.js"></script>
     <script src="js/forecast-poc.js"></script>
 
@@ -40,16 +39,13 @@
                     <b>Forecasting Tool</b>
                 </span>
             </a>
-            <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button> -->
             <ul class="navbar-nav mr-auto">
                 <a class="btn btn-primary" data-toggle="collapse" href="#searchCollapse" role="button" aria-expanded="false" aria-controls="searchCollapse">
                     <i class="fa fa-search fa-2x" style="color:Yellow" aria-hidden="true"></i>
                 </a>
             </ul>
             <!-- Models multiselect -->
-            <form class="form-inline my-2 my-lg-0">
+            <form id="modelSelectForm" class="form-inline my-2 my-lg-0">
                 <div class="input-group mb-2 mr-sm-2 mb-sm-0">
                     <div class="input-group-addon">
                         <span class="input-group-text" id="basic-addon1">Models</span>
@@ -64,13 +60,15 @@
             </form>
 
         </nav>
+
+        <!-- Search Panel -->
         <div class="collapse" id="searchCollapse">
             <form class="form-inline search-form">
 
                 <!-- Hierarchy Dropdown-->
                 <div class="input-group">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Search type</span>
+                        <span class="input-group-text" id="basic-addon1">Search by</span>
                     </div>
                     <select id="searchTypeSelect" class="form-control mb-2 mr-sm-2 mb-sm-0">
                         <option value="lineNumber">Line number</option>
@@ -80,20 +78,15 @@
                 </div>
 
                 <!-- Search input -->
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">Search by</span>
-                    </div>
-                    <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="searchByInput" placeholder="Search by">
-                </div>
+                <label class="sr-only" for="inlineFormInputGroup">Search by</label>
+                <input type="text" class="form-control mb-2 mr-sm-4 mb-sm-0" id="searchByInput" placeholder="Search value">
 
                 <!-- Start date input -->
-                <label class="sr-only" for="inlineFormInputGroup">Start date</label>
                 <div class="input-group date">
                     <div class="input-group-addon">
                         <span class="input-group-text" id="basic-addon1">Start date</span>
                     </div>
-                    <input class="form-control text-box single-line mb-2 mr-sm-2 mb-sm-0" id="date" name="date" placeholder="Start date" type="date">
+                    <input class="form-control text-box single-line mb-2 mr-sm-4 mb-sm-0" id="date" name="date" placeholder="Start date" type="date">
                 </div>
 
                 <!-- Weeks spinner -->
@@ -120,10 +113,9 @@
 
             </form>
 
-        </div>
+        </div> <!-- End-Search Panel -->
 
     </div>
-
 
     <!-- Forecasting main chart -->
     <div id="container"></div>
