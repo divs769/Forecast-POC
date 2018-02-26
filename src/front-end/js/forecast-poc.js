@@ -116,13 +116,13 @@ $(document).ready(function(){
     popup.classList.toggle("show");
   });
 
-    $('.dropdown-item').click(function(event) {
-      var id = event.target.id
-      if(hierarchyType != id){
-        $("#header-searchInput").val("")
-      }
+    $('#searchTypeSelect').change(function() {
+      var id = $(this).val()
+      /*if(hierarchyType != id){
+        $("#searchByInput").val("")
+      }*/
       hierarchyType = id
-      $('#header-searchInput').attr('placeholder', "Enter the "+getHierarchyValue(id))
+      //$('#header-searchInput').attr('placeholder', "Enter the "+getHierarchyValue(id))
     });
 
     //Initialize the Weeks spinner
@@ -130,7 +130,9 @@ $(document).ready(function(){
       $('.spinner input').val(parseInt($('.spinner input').val(), 10) + 1);
     });
     $('.spinner .btn:last-of-type').on('click', function () {
-        $('.spinner input').val(parseInt($('.spinner input').val(), 10) - 1);
+        if(parseInt($('.spinner input').val()) > 1){
+           $('.spinner input').val(parseInt($('.spinner input').val(), 10) - 1);
+        }
     });
 
     // Initialize the model dropdown
@@ -247,10 +249,7 @@ function refreshGraph(series) {
           alert("Please enter the "+hierarchyTypes[hierarchyType])
       }else{
            if(startDate !== ""){
-              var splittedDate = startDate.split("/")
-              if(splittedDate.length == 3){
-                  datePath += "/" + splittedDate.reverse().join("-")
-              }
+              datePath += "/" + startDate
           }
           $.ajax({
           dataType: 'json',
