@@ -59,8 +59,10 @@ $(document).ready(function(){
            buttonWidth: '400px'
     });
 
-   
+   $('.modelsSelct').hide();
+   $('#collapseBtn').hide();
     $('#searchBtn').click(function(){
+        $('#collapseBtn').show();
         var weeks = $('#weeksSpinner').val().trim();
         var searchByValue = $('#searchByInput').val();
         var startDate = $("input[name='date']")[0].value
