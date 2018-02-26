@@ -2,6 +2,12 @@ var chart;
 
 var series = [];
 $(document).ready(function () {
+  // Initialize the model dropdown
+  $('#modelSelect').multiselect({
+    includeSelectAllOption: true,
+    buttonWidth: '200px'
+  });
+
   chart = new Highcharts.Chart({
     chart: {
       type: 'line',
@@ -63,15 +69,12 @@ $(document).ready(function () {
     loadBackEndData(weeks, searchByValue, startDate, hierarchyType, function () {
       var availableModels = getAvailableModels();
       var sales = getSalesData();
-      if (availableModels.length > 0 || sales.length > 0) {
-        var options = [];
-        for (i = 0; i < availableModels.length; i++) {
-          options[i] = '<option value="' + availableModels[i].name + '">' + availableModels[i].name + '</option>';
-        }
-        deleteOldCharts();
-        $("#modelSelect").append(options);
-        $('#modelSelect').multiselect('rebuild');
 
+      if (availableModels.length > 0 || sales.length > 0) {
+      
+        deleteOldCharts();
+        updateModelSelect(availableModels);
+        
         for (i = 0; i < sales.length; i++) {
           series.push({ name: sales[i].name, data: sales[i].values })
         }
@@ -86,6 +89,16 @@ $(document).ready(function () {
 
     });
   });
+
+  function updateModelSelect(models) {
+    var options = [];
+    var modelSelect = $("#modelSelect");
+    for (i = 0; i < models.length; i++) {
+      options.push({label: models[i].name, value: models[i].name});
+    }
+    modelSelect.multiselect('dataprovider', options);
+    modelSelect.multiselect('refresh');
+  }
 
   //Add listener to the collapse to change the icon according to it's state
   $('.collapse')
@@ -145,8 +158,7 @@ $(document).ready(function () {
     }
   });
 
-  // Initialize the model dropdown
-  $('#modelSelect').multiselect();
+  
   showModelSelectForm(false)
 });
 

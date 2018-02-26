@@ -30,7 +30,7 @@
 </head>
 
 <body>
-    <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" />
+    <!-- <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" /> -->
     <div class="pos-f-t">
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <a class="navbar-brand" href="#">
@@ -45,18 +45,21 @@
                 </a>
             </ul>
             <!-- Models multiselect -->
-            <form id="modelSelectForm" class="form-inline my-2 my-lg-0">
-                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                    <div class="input-group-addon">
+            <form id="modelSelectForm" class="form my-2 my-lg-0">
+                <!-- Models dropdown -->
+                <div class="input-group">
+                    <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Models</span>
                     </div>
-                    <select id="modelSelect" class="form-control" multiple="multiple"></select>
+                    <select id="modelSelect" class="form-control mb-2 mr-sm-4 mb-sm-0" multiple="multiple"></select>
+                    <!-- Refresh button -->
+                    <div class="input-group-append">
+                            <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
+                                    <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+                                </a>
+                    </div>
                 </div>
-
-                <!-- Refresh button -->
-                <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
-                    <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
-                </a>
+                
             </form>
 
         </nav>

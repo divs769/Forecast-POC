@@ -64,3 +64,14 @@
     top: 0;
     left: 4px;
 }
+
+/* Fix for the bootstrap-multiselect options alignment*/
+.form-inline .multiselect-container label.checkbox,
+.form-inline .multiselect-container label.radio{
+    padding: 3px 20px 3px 40px;
+}
+.form-inline .multiselect-container li a label.checkbox input[type="checkbox"],
+.form-inline .multiselect-container li a label.radio input[type="radio"]{
+    margin-left: -20px;
+    margin-right: 0px;
+} 
