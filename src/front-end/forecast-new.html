@@ -32,12 +32,39 @@
 
 <body>
     <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" />
-    <div class="container-fluid search-container">
-        <div class="page-header">
-            <h2>Forecasting Tool</h2>
-        </div>
-        <div class="row">
+    <div class="pos-f-t">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="#">
+                <img src="img/SD_Logo.png" class="d-inline-block align-top" alt="">
+                <span style="font-size: 34px; margin-left: 10px">
+                    <b>Forecasting Tool</b>
+                </span>
+            </a>
+            <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button> -->
+            <ul class="navbar-nav mr-auto">
+                <a class="btn btn-primary" data-toggle="collapse" href="#searchCollapse" role="button" aria-expanded="false" aria-controls="searchCollapse">
+                    <i class="fa fa-search fa-2x" style="color:Yellow" aria-hidden="true"></i>
+                </a>
+            </ul>
+            <!-- Models multiselect -->
+            <form class="form-inline my-2 my-lg-0">
+                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                    <div class="input-group-addon">
+                        <span class="input-group-text" id="basic-addon1">Models</span>
+                    </div>
+                    <select id="modelSelect" class="form-control" multiple="multiple"></select>
+                </div>
 
+                <!-- Refresh button -->
+                <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
+                    <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+                </a>
+            </form>
+
+        </nav>
+        <div class="collapse" id="searchCollapse">
             <form class="form-inline search-form">
 
                 <!-- Hierarchy Dropdown-->
@@ -90,30 +117,13 @@
                 <a id="searchBtn" class="btn btn-primary btn-md" style="margin-left: 30px" href="#">
                     <i class="fa fa-search" aria-hidden="true"></i> Search
                 </a>
-                
+
             </form>
 
-            
-            <!-- <div class="container-fluid"> -->
-
-                <!-- Models multiselect -->
-                <form class="form-inline" style="margin-left: 50px">
-                    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                        <div class="input-group-addon">
-                            <span class="input-group-text" id="basic-addon1">Models</span>
-                        </div>
-                        <select id="modelSelect" class="form-control" multiple="multiple"></select>
-                    </div>
-
-                    <!-- Refresh button -->
-                    <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
-                        <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
-                    </a>
-                </form>
-            <!-- </div> -->
         </div>
+
     </div>
-    <!-- End Search Container -->
+
 
     <!-- Forecasting main chart -->
     <div id="container"></div>
