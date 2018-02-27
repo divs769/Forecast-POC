@@ -47,7 +47,7 @@ $(document).ready(function () {
                 headingText: this.series.name,
                 maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
 
-                  this.y + ' visits',
+                this.y + ' visits',
                 width: 200
               });
             }
@@ -72,7 +72,7 @@ $(document).ready(function () {
       var sales = getSalesData();
 
       if (availableModels.length > 0 || sales.length > 0) {
-deleteOldCharts();
+        deleteOldCharts();
         updateModelSelect(availableModels);
 
         for (i = 0; i < sales.length; i++) {
@@ -107,38 +107,32 @@ deleteOldCharts();
   }
 
   //Add listener to the collapse to change the icon according to it's state
-  $('.collapse')
-
-  .on('shown.bs.collapse', function() {
-      $(this)
-        .parent()
-        .find(".fa-search-plus")
-        .removeClass("fa-search-plus")
-        .addClass("fa-search-minus");
-    })
-    .on('hidden.bs.collapse', function () {
-      $(this)
-        .parent()
-        .find(".fa-search-minus")
-        .removeClass("fa-search-minus")
-        .addClass("fa-search-plus");
-    });
+  $('.collapse').on('shown.bs.collapse', function () {
+    $(this)
+      .parent()
+      .find(".fa-search-plus")
+      .removeClass("fa-search-plus")
+      .addClass("fa-search-minus");
+  }).on('hidden.bs.collapse', function () {
+    $(this)
+      .parent()
+      .find(".fa-search-minus")
+      .removeClass("fa-search-minus")
+      .addClass("fa-search-plus");
+  });
 
 
   refreshBtnFn();
 
 
-    function drawRow(rowData) {
-      var row = $("<tr />")
-      $("#historyData").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-      row.append($("<td>" + Highcharts.dateFormat('%b %e %Y', rowData.x) + "</td>"));
-      row.append($("<td>" + rowData.y + "</td>"));
+  function drawRow(rowData) {
+    var row = $("<tr />")
+    $("#historyData").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+    row.append($("<td>" + Highcharts.dateFormat('%b %e %Y', rowData.x) + "</td>"));
+    row.append($("<td>" + rowData.y + "</td>"));
 
-    }
+  }
 
-    var popup = document.getElementById("myPopup");
-    popup.classList.toggle("show");
-  });
 
   $('#searchTypeSelect').change(function () {
     var id = $(this).val()
@@ -171,44 +165,62 @@ function showModelSelectForm(show) {
   }
 }
 
-function createDataModalForModels(model) {
-  var html = '<div class="modal fade" id="' + model.name + 'Modal" role="dialog">';
-  html += '<div class="modal-dialog modal-lg">';
-  html += '<div class="modal-content">';
-  html += '<div class="modal-header">';
-  html += '<h4 style="font-size: 18px" > Forecast Data - Demand (' + model.name + ' )</h4>';
-  html += '<button type="button" class="close" data-dismiss="modal">&times;</button>';
-  html += '</div>';
-  html += '<div class="modal-body">';
-  html += '<div class="table-responsive">';
-  html += '<table class="table">';
-  html += '<thead>';
-  html += '<tr>';
-  html += '<th>Date Month Year</th>';
-  html += '<th>Total Stock</th>';
-  html += '</tr>';
-  html += '</thead>';
-  html += '<tbody>';
+function createEditModelTable(model) {
+  var tbody = $('<tbody></tbody>');
   for (var i = 0; i < model.values.length; i++) {
-    html += '<tr/>';
-    html += "<td>" + Highcharts.dateFormat('%b %e %Y', model.values[i].x) + "</td>";
-    html += "<td>" + model.values[i].y + "</td>";
+    var row = '<tr>';
+    row += "<td>" + Highcharts.dateFormat('%b %e %Y', model.values[i].x) + "</td>";
+    row += "<td>" + model.values[i].y + "</td>";
+    row += '</tr>'
+    tbody.append(row);
   }
-  $('.modal-container').append(html);
-  console.log(html);
-  console.log($('.modal-container').html());
-  var endHtml = '';
-  endHtml += '</tbody>';
-  endHtml += '</table>';
-  endHtml += '</div>';
-  endHtml += '</div>';
-  endHtml += '<div class="modal-footer">';
-  endHtml += '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
-  endHtml += '</div>';
-  endHtml += '</div>';
-  endHtml += '</div>';
-  endHtml += '</div>';
-  $('.modal-container').append(endHtml);
+
+  var table = $('<table id="editModelTable" class="table"></table>');
+  table.append('<thead><tr><th>Date</th><th>Total Stock</th></tr></thead>');
+  table.append(tbody);
+
+  return table;
+}
+
+function createDataModalForModels(model) {
+  var dialogId = model.name + "Modal";
+  var table = createEditModelTable(model);
+
+  var tableContainer = $('<div class="table-responsive"></div>');
+  tableContainer.append(table);
+
+  var modalHeader = $('<div class="modal-header"><h4 style="font-size: 18px" > Editing model - ' + model.name + ' </h4></div>');
+
+  var modalBody = $('<div class="modal-body" ></div>');
+  
+  var divRowTable = $('<div class="row" style="height: 450px; overflow-y: auto"></div>');
+  divRowTable.append(tableContainer);
+  
+  var divRowReasonChange = $('<div class="row" style="margin-top: 10px"></div>');
+  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea class="form-control" id="reasonForChange" rows="3"></textarea></div></div>');
+  divRowReasonChange.append(reasonForChangeTextArea);
+
+  modalBody.append(divRowTable);
+  modalBody.append(divRowReasonChange);
+
+  var modalFooter = $('<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>');
+
+  var modalContent = $('<div class="modal-content"></div>');
+  modalContent.append(modalHeader);
+  modalContent.append(modalBody);
+  modalContent.append(modalFooter);
+
+  var modalDialog = $('<div class="modal-dialog"></div>');
+  modalDialog.append(modalContent);
+
+  var modal = $('<div class="modal fade" id="' + dialogId + '" role="dialog"></div>');
+  modal.append(modalDialog);
+
+  // Removing cached data for the previous modal
+  $('#' + dialogId).removeData('bs.modal');
+  $('#editModelContainer').empty();
+  $('#editModelContainer').append(modal);
+
 }
 
 function refreshBtnFn() {
