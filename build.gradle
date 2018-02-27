@@ -9,7 +9,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath 'com.commercehub:gatling-gradle-plugin:2.0'
-		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2.1"
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
 		classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
 	}
 }
@@ -26,7 +26,6 @@ apply plugin: 'org.springframework.boot'
 
 apply plugin: "jacoco"
 
-apply plugin: 'scala'
 apply plugin: 'gatling'
 
 jacoco {
@@ -68,6 +67,9 @@ sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
+	maven {
+		url "https://s3.eu-central-1.amazonaws.com/dynamodb-local-frankfurt/release"
+	}
 }
 
 sourceSets {
@@ -122,11 +124,18 @@ dependencies {
 	testCompile('info.cukes:cucumber-junit:1.2.5') //to run in junit via the ide
 	testCompile('info.cukes:cucumber-spring:1.2.5') //to use dependency injection
 	acceptanceTestCompile('org.springframework:spring-tx:4.3.6.RELEASE') //to run acceptance tests from feature file in IDE
-	compile "org.scala-lang:scala-library:${SCALA_VERSION}"
-	loadTestCompile "io.gatling:gatling-http:${GATLING_VERSION}"
-	loadTestCompile "io.gatling:gatling-core:${GATLING_VERSION}"
-	loadTestCompile "io.gatling.highcharts:gatling-charts-highcharts:${GATLING_VERSION}"
-	testCompile "io.gatling:gatling-app:${GATLING_VERSION}"
+	compile ("com.amazonaws:aws-java-sdk-core:1.11.271")
+	compile ("com.amazonaws:aws-java-sdk-dynamodb:1.11.271") {
+		exclude group: 'org.amazonaws', module: 'java-sdk-core'
+	}
+	compile ("com.github.derjust:spring-data-dynamodb:4.5.4") {
+		exclude group: 'org.springframework', module: 'spring-context'
+		exclude group: 'org.springframework', module: 'spring-aop'
+		exclude group: 'org.springframework', module: 'spring-tx'
+	}
+	acceptanceTestCompile "com.amazonaws:DynamoDBLocal:[1.11,2.0)"
+	acceptanceTestCompile "com.almworks.sqlite4java:sqlite4java:1.0.392"
+	compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4"
 }
 
 task version {
@@ -166,7 +175,18 @@ assert file(configFile).exists()
 
 }
 
+task copyNativeDeps(type: Copy) {
+	from(configurations.compile + configurations.acceptanceTestCompile) {
+		include '*.dll'
+		include '*.dylib'
+		include '*.so'
+	}
+	into 'build/libs'
+}
+
 task acceptanceTest(type: Test) {
+	dependsOn copyNativeDeps
+	systemProperty "java.library.path", 'build/libs'
 	testClassesDir = sourceSets.acceptanceTest.output.classesDir
 	classpath = sourceSets.acceptanceTest.runtimeClasspath
 	outputs.upToDateWhen { false }

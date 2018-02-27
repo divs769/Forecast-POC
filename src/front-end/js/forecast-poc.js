@@ -46,6 +46,7 @@ $(document).ready(function () {
                 },
                 headingText: this.series.name,
                 maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+
                   this.y + ' visits',
                 width: 200
               });
@@ -71,14 +72,12 @@ $(document).ready(function () {
       var sales = getSalesData();
 
       if (availableModels.length > 0 || sales.length > 0) {
-
-        deleteOldCharts();
+deleteOldCharts();
         updateModelSelect(availableModels);
 
         for (i = 0; i < sales.length; i++) {
           series.push({ name: sales[i].name, data: sales[i].values })
         }
-
         markBestModel(series, availableModels)
 
         showModelSelectForm(true);
@@ -109,7 +108,8 @@ $(document).ready(function () {
 
   //Add listener to the collapse to change the icon according to it's state
   $('.collapse')
-    .on('shown.bs.collapse', function () {
+
+  .on('shown.bs.collapse', function() {
       $(this)
         .parent()
         .find(".fa-search-plus")
@@ -126,7 +126,19 @@ $(document).ready(function () {
 
 
   refreshBtnFn();
-  
+
+
+    function drawRow(rowData) {
+      var row = $("<tr />")
+      $("#historyData").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+      row.append($("<td>" + Highcharts.dateFormat('%b %e %Y', rowData.x) + "</td>"));
+      row.append($("<td>" + rowData.y + "</td>"));
+
+    }
+
+    var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+  });
 
   $('#searchTypeSelect').change(function () {
     var id = $(this).val()
@@ -146,7 +158,6 @@ $(document).ready(function () {
       $('.spinner input').val(parseInt($('.spinner input').val(), 10) - 1);
     }
   });
-
 
   showModelSelectForm(false)
 });
