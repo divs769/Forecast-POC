@@ -21,7 +21,8 @@ import static com.shopdirect.acceptancetest.configuration.TestConfiguration.STOC
 
 public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
 
-    protected static final String ENDPOINT = "http://localhost:8080/forecast";
+    protected static final String BASE_ENDPOINT = "http://localhost:8080";
+    protected static final String ENDPOINT = BASE_ENDPOINT+"/forecast";
     protected static final String TABLE = "forecast_stock";
 
     protected RestTemplate restTemplate;

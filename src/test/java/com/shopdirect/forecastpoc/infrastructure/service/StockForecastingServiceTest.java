@@ -16,6 +16,7 @@ import java.time.Month;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,13 +33,94 @@ public class StockForecastingServiceTest {
     @Mock
     private ProductsAndCategoriesDao productsAndCategoriesDao;
 
+    @Mock
+    private CustomiseModelsService customiseModelsService;
+
     @Captor
     private ArgumentCaptor<Map<String, AttributeValue>> captor;
 
     @Before
     public void setUp() throws Exception {
-        stockForecastingService = new StockForecastingService(lineStockDao, productsAndCategoriesDao);
+        stockForecastingService = new StockForecastingService(lineStockDao, productsAndCategoriesDao, customiseModelsService);
     }
+
+    @Test
+    public void testPredictionsWithCustomisedModel() {
+        initProds();
+        when(lineStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prods[3], prods[4], prods[5], prods[6], prods[7]));
+        HierarchyItem item = new HierarchyItem(ProductHierarchy.LINE_NUMBER, "8M417");
+        List<CustomisedModel> models = createListCustomisedModels(item);
+        when(customiseModelsService.getCustomisedModels(any())).thenReturn(models);
+        ForecastingResult result = stockForecastingService.getForecastings(1, "8M417");
+        assertEquals(5, result.getHistoricData().size());
+        compareProductStock(prods[3], result.getHistoricData().get(0));
+        compareProductStock(prods[4], result.getHistoricData().get(1));
+        compareProductStock(prods[5], result.getHistoricData().get(2));
+        compareProductStock(prods[6], result.getHistoricData().get(3));
+        compareProductStock(prods[7], result.getHistoricData().get(4));
+        List<ForecastingModelResult> results = result.getForecastings();
+        assertEquals(5, results.size());
+        List<ForecastingModelResult> expectedResults = new ArrayList<>();
+        List<StockDataItem> naiveForecastings = Arrays.asList(
+                new StockDataItem(initialDate.plusDays(28), 40),
+                new StockDataItem(initialDate.plusDays(35), 50),
+                new StockDataItem(initialDate.plusDays(42), 60),
+                new StockDataItem(initialDate.plusDays(49), 70),
+                new StockDataItem(initialDate.plusDays(56), 80)
+        );
+        List<StockDataItem> averageForecastings = Arrays.asList(
+                new StockDataItem(initialDate.plusDays(28), 40),
+                new StockDataItem(initialDate.plusDays(35), 45),
+                new StockDataItem(initialDate.plusDays(42), 50),
+                new StockDataItem(initialDate.plusDays(49), 55),
+                new StockDataItem(initialDate.plusDays(56), 60));
+        expectedResults.add(new ForecastingModelResult(Arrays.asList(
+                models.get(1).getForecastedValues().get(0),
+                models.get(1).getForecastedValues().get(1),
+                models.get(1).getForecastedValues().get(2),
+                models.get(1).getForecastedValues().get(3),
+                naiveForecastings.get(4)
+        ), null, "Customised 2"));
+        expectedResults.add(new ForecastingModelResult(naiveForecastings, 15.607, "naive"));
+        expectedResults.add(new ForecastingModelResult(Arrays.asList(
+                models.get(2).getForecastedValues().get(0),
+                averageForecastings.get(1),
+                averageForecastings.get(2),
+                averageForecastings.get(3),
+                averageForecastings.get(4)), null, "Customised 3"));
+        expectedResults.add(new ForecastingModelResult(averageForecastings, 49.219, "average"));
+        expectedResults.add(new ForecastingModelResult(Arrays.asList(
+                models.get(0).getForecastedValues().get(0),
+                models.get(0).getForecastedValues().get(1),
+                models.get(0).getForecastedValues().get(2),
+                naiveForecastings.get(3),
+                naiveForecastings.get(4)), null, "Customised 1"));
+        for(int i = 0; i < results.size(); i++){
+           compareForecastingResultIgnoringError(expectedResults.get(i), results.get(i));
+        }
+
+    }
+
+    private List<CustomisedModel> createListCustomisedModels(HierarchyItem item) {
+        return Arrays.asList(
+                new CustomisedModel(3,
+                        "Customised 1", "naive", item,
+                        Arrays.asList(new StockDataItem(prods[4].getDate(), 12),
+                                new StockDataItem(prods[5].getDate(), 22),
+                                new StockDataItem(prods[6].getDate(), 32)
+                        ), "Comment 1"),
+                new CustomisedModel(4,
+                        "Customised 2", "naive", item,
+                        Arrays.asList(new StockDataItem(prods[4].getDate(), 53),
+                                new StockDataItem(prods[5].getDate(), 63),
+                                new StockDataItem(prods[6].getDate(), 71),
+                                new StockDataItem(prods[7].getDate(), 82)
+                        ), "Comment 2"),
+                new CustomisedModel(5,
+                        "Customised 3", "average", item,
+                        Arrays.asList(new StockDataItem(prods[4].getDate(), 51)), "Comment 3"));
+    }
+
 
     @Test
     public void testPredictionsWithStartDate(){
@@ -146,6 +228,7 @@ public class StockForecastingServiceTest {
     public void testHistoryWith1Product(){
         LineStockData prod = new LineStockData(initialDate, 10);
         when(lineStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prod));
+        when(customiseModelsService.getCustomisedModels(any())).thenReturn(new ArrayList<>());
         ForecastingResult result = stockForecastingService.getForecastings(4, "8M417");
         assertEquals(1, result.getHistoricData().size());
         compareProductStock(prod, result.getHistoricData().get(0));
@@ -172,6 +255,7 @@ public class StockForecastingServiceTest {
         LineStockData prod = new LineStockData(initialDate, 10);
         LineStockData prod2 = new LineStockData(initialDate.plusDays(7), 20);
         when(lineStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prod, prod2));
+        when(customiseModelsService.getCustomisedModels(any())).thenReturn(new ArrayList<>());
         ForecastingResult result = stockForecastingService.getForecastings(2, "8M417", initialDate.plusWeeks(3));
         assertEquals(0, result.getHistoricData().size());
         List<ForecastingModelResult> results = result.getForecastings();
@@ -305,6 +389,12 @@ public class StockForecastingServiceTest {
     }
 
     private void initData() {
+        initProds();
+        when(lineStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prods));
+        when(customiseModelsService.getCustomisedModels(any())).thenReturn(new ArrayList<>());
+    }
+
+    private void initProds() {
         prods = new LineStockData[8];
         prods[0] = new LineStockData(initialDate, 10);
         prods[1] = new LineStockData(initialDate.plusDays(7), 20);
@@ -314,7 +404,5 @@ public class StockForecastingServiceTest {
         prods[5] = new LineStockData(initialDate.plusDays(35), 60);
         prods[6] = new LineStockData(initialDate.plusDays(42), 70);
         prods[7] = new LineStockData(initialDate.plusDays(49), 80);
-
-        when(lineStockDao.getByLineNumber("8M417")).thenReturn(Arrays.asList(prods));
     }
 }

@@ -16,19 +16,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.naturalOrder;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @Component
 public class StockForecastingService {
     private final LineStockDao lineStockDao;
     private final ProductsAndCategoriesDao productsAndCategoriesDao;
+    private final CustomiseModelsService customiseModelsService;
     private Map<String, BiFunction<Stream<StockDataItem>, Stream<LocalDate>, Stream<StockDataItem>>> forecastingMethods;
 
     @Autowired
     public StockForecastingService(LineStockDao lineStockDao
-            , ProductsAndCategoriesDao productAndCategoriesDao) {
+            , ProductsAndCategoriesDao productAndCategoriesDao, CustomiseModelsService customiseModelsService) {
         this.lineStockDao = lineStockDao;
         this.productsAndCategoriesDao = productAndCategoriesDao;
+        this.customiseModelsService = customiseModelsService;
         this.forecastingMethods = new HashMap<>();
         forecastingMethods.put("naive", StockForecastingModels::naivePrediction);
         forecastingMethods.put("average", StockForecastingModels::averagePrediction);
@@ -51,25 +54,114 @@ public class StockForecastingService {
         if(fullProductStockData == null || fullProductStockData.isEmpty()){
             return new ForecastingResult(Arrays.asList(), fullProductStockData);
         }
-
         List<ForecastingModelResult> forecastings = calculatePastForecastings(fullProductStockData, startDate);
+        List<StockDataItem> filteredProductStockData = filterByStartDate(startDate, fullProductStockData);
+        /*List<CustomisedModelResult> forecastingsCustomisedModels = getForecastingsCustomisedModels(
+                startDate,
+                new HierarchyItem(type, hierarchyValue),
+                forecastings, filteredProductStockData);*/
+
         List<LocalDate> nextDates = getNextWeekDates(numWeeks, fullProductStockData.get(fullProductStockData.size() - 1), startDate)
                 .collect(Collectors.toList());
-
+        
          for(String name : forecastingMethods.keySet()){
              Stream<StockDataItem> newForecastings = forecastingMethods.get(name)
                      .apply(fullProductStockData.stream(), nextDates.stream());
 
-             forecastings.stream()
-                     .filter(forecastingResult -> forecastingResult.getName().equals(name))
-                     .limit(1)
-                     .collect(Collectors.toList())
-                     .get(0)
-                     .getForecastedValues()
+             getForecastedValuesByName(forecastings, name)
                      .addAll(newForecastings.collect(Collectors.toList()));
          }
+/*
+         List<ForecastingModelResult> forecastingsByCustomisedModels = forecastingsCustomisedModels.stream()
+                 .map(customisedResult ->
+             createForecastingResultFromCustomisedResult(fullProductStockData, nextDates, customisedResult))
+                 .collect(toList());
+*/
+        List<ForecastingModelResult> forecastingsByCustomisedModels = getForecastingsCustomisedModels(
+                numWeeks,
+                new HierarchyItem(type, hierarchyValue),
+                forecastings,
+                filteredProductStockData);
+        List<ForecastingModelResult> allForecastings;
+        if(forecastingsByCustomisedModels.size() > 0){
+             allForecastings = Stream.of(forecastings, forecastingsByCustomisedModels)
+                    .flatMap(item -> item.stream())
+                    .sorted(Comparator.comparing(ForecastingModelResult::getError))
+                    .collect(toList());
+        }else{
+            allForecastings = forecastings;
+        }
 
-        return new ForecastingResult(forecastings, filterByStartDate(startDate, fullProductStockData) );
+        return new ForecastingResult(allForecastings, filteredProductStockData );
+    }
+/*
+    public ForecastingModelResult createForecastingResultFromCustomisedResult(List<StockDataItem> fullProductStockData, List<LocalDate> nextDates, CustomisedModelResult customisedResult) {
+        List<LocalDate> datesWithPrediction = customisedResult.getForecastedValues().stream()
+                .filter(customItem -> nextDates.contains(customItem.getDate()))
+                .map(customItem -> customItem.getDate()).collect(toList());
+        List<LocalDate> missingNextDates = nextDates.stream()
+                .filter(date -> !datesWithPrediction.contains(date)).collect(toList());
+        Stream<StockDataItem> newForecastings = forecastingMethods.get(customisedResult.getClonedModel())
+                .apply(fullProductStockData.stream(), missingNextDates.stream());
+
+        customisedResult.getForecastedValues().addAll(newForecastings.collect(toList()));
+
+        return new ForecastingModelResult(customisedResult.getForecastedValues(), customisedResult.getError(),
+                customisedResult.getName());
+    }
+*/
+    public List<StockDataItem> getForecastedValuesByName(List<ForecastingModelResult> forecastings, String name) {
+        return forecastings.stream()
+                .filter(forecastingResult -> forecastingResult.getName().equals(name))
+                .limit(1)
+                .collect(Collectors.toList())
+                .get(0)
+                .getForecastedValues();
+    }
+
+    private List<ForecastingModelResult> getForecastingsCustomisedModels(int numWeeks,
+                                                                         HierarchyItem item,
+                                                                         List<ForecastingModelResult> forecastings,
+                                                                         List<StockDataItem> filteredProductStockData) {
+        List<CustomisedModel> customisedModels = customiseModelsService.getCustomisedModels(item);
+        Map<LocalDate, StockDataItem> actualValues = filteredProductStockData.stream()
+                .collect(toMap(StockDataItem::getDate, stockItem -> stockItem));
+        return customisedModels.stream()
+                .map(customisedModel ->
+                    getForecastingModelResultFromCustomisation(numWeeks, forecastings, customisedModel, actualValues))
+                .collect(toList());
+    }
+
+    private ForecastingModelResult getForecastingModelResultFromCustomisation(int numWeeks,
+                                                                            List<ForecastingModelResult> forecastings,
+                                                                             CustomisedModel customisedModel,
+                                                                             Map<LocalDate, StockDataItem> actualValues) {
+
+        Map<LocalDate, StockDataItem> customisedItemsMap = customisedModel.getForecastedValues().stream()
+                .collect(toMap(StockDataItem::getDate, item -> item));
+        List<StockDataItem> forecastedValues = getForecastedValuesByName(forecastings, customisedModel.getClonedModel());
+        List<StockDataItem> allCustomisedForecastedValues = forecastedValues.stream()
+                .map(item -> {
+                    if(customisedItemsMap.containsKey(item.getDate())){
+                        return customisedItemsMap.get(item.getDate());
+                    }else{
+                        return item;
+                    }
+                }).collect(toList());
+        /*List<StockDataItem> itemsNotOnCustomisation = getForecastedValuesByName(forecastings, customisedModel.getClonedModel())
+                .stream()
+                .filter(forecastedItem -> !dates.contains(forecastedItem.getDate())).collect(toList());
+        List<StockDataItem> mergedItems = Stream.of(items, itemsNotOnCustomisation)
+                .flatMap(mergedItem -> mergedItem.stream())
+                .sorted(Comparator.comparing(StockDataItem::getDate))
+                .collect(toList());
+        List<StockDataItem> pastItems = mergedItems.stream()
+                .limit(mergedItems.size() - actualValues.size()).collect(toList());*/
+        Stream<StockDataItem> pastItems = allCustomisedForecastedValues
+                .stream().limit(forecastedValues.size() - numWeeks);
+        Double error = calculateError(pastItems, actualValues);
+        return new CustomisedModelResult(customisedModel.getId(), allCustomisedForecastedValues, error, customisedModel.getName());
+        //return new CustomisedModelResult(mergedItems, error, customisedModel.getName(), customisedModel.getClonedModel());
     }
 
     private List<StockDataItem> getProductStockData(ProductHierarchy type, String hierarchyValue) {
@@ -168,14 +260,18 @@ public class StockForecastingService {
                 .limit(numberWeeks);
     }
 
-    private Double calculateError(List<StockDataItem> forecastedValues, Map<LocalDate, StockDataItem> actualValues){
-        OptionalDouble error = forecastedValues.stream().map(prod ->
+    private Double calculateError(Stream<StockDataItem> forecastedValues, Map<LocalDate, StockDataItem> actualValues){
+        OptionalDouble error = forecastedValues.map(prod ->
                 ((double) Math.abs(prod.getStock() - actualValues.get(prod.getDate()).getStock()))
-                            / (1 + actualValues.get(prod.getDate()).getStock()))
+                        / (1 + actualValues.get(prod.getDate()).getStock()))
                 .mapToDouble(elem -> elem)
                 .average();
 
         return error.isPresent() ? 100 * error.getAsDouble() : null;
+    }
+
+    private Double calculateError(List<StockDataItem> forecastedValues, Map<LocalDate, StockDataItem> actualValues){
+        return calculateError(forecastedValues.stream(), actualValues);
     }
 
     public void saveStockData(LineStockData data) {
