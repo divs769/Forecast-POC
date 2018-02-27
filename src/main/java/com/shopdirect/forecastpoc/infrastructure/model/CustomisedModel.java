@@ -28,15 +28,6 @@ public class CustomisedModel {
         this.forecastedValues = forecastedValues;
         this.comment = comment;
     }
-/*
-    public CustomisedModel(long id, String name, String clonedModel, HierarchyItem item, List<StockDataItem> forecastedValues, String comment) {
-        this.id = id;
-        this.name = name;
-        this.clonedModel = clonedModel;
-        this.item = item;
-        this.forecastedValues = forecastedValues;
-        this.comment = comment;
-    }*/
 
     public String getComment() {
         return comment;
