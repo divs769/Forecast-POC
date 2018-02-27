@@ -1,7 +1,11 @@
+//TODO: x-editable store locally before saving in the database - http://vitalets.github.io/x-editable/docs.html#newrecord
+
 var chart;
 
 var series = [];
 $(document).ready(function () {
+  configureXEditable();
+
   // Initialize the model dropdown
   $('#modelSelect').multiselect({
     includeSelectAllOption: false,
@@ -92,6 +96,16 @@ $(document).ready(function () {
     });
   });
 
+  function configureXEditable() {
+    $.fn.editableform.buttons =
+    '<button type="submit" class="btn btn-primary btn-sm editable-submit">'+
+      '<i class="fa fa-fw fa-check"></i>'+
+    '</button>'+
+    '<button type="button" class="btn btn-default btn-sm editable-cancel">'+
+      '<i class="fa fa-fw fa-times"></i>'+
+    '</button>';
+  }
+
   function loadAndShowProductImg(product) {
     $("#productImageCard").show();
   }
@@ -170,7 +184,8 @@ function createEditModelTable(model) {
   for (var i = 0; i < model.values.length; i++) {
     var row = '<tr>';
     row += "<td>" + Highcharts.dateFormat('%b %e %Y', model.values[i].x) + "</td>";
-    row += "<td>" + model.values[i].y + "</td>";
+    var editableValue = '<a href="#" id="value-'+model.values[i].y+'" data-type="number" data-url="/post" data-title="Enter value">' + model.values[i].y + '</a>'
+    row += "<td class='edit'>" + editableValue + "</td>";
     row += '</tr>'
     tbody.append(row);
   }
@@ -189,31 +204,38 @@ function createDataModalForModels(model) {
   var tableContainer = $('<div class="table-responsive"></div>');
   tableContainer.append(table);
 
-  var modalHeader = $('<div class="modal-header"><h4 style="font-size: 18px" > Editing model - ' + model.name + ' </h4></div>');
+  var modalHeader = $('<div class="modal-header"></div>');
+  var modalHeaderContainer = $('<div class="container"></div>');
+  var originModelName = $('<div class="row"><h4>Origin</h4><input id="originModelName" class="form-control" style="font-size: 18px" type="text" value="' + model.name + '" disabled></input></div>');
+  var newModelName = $('<div class="row"><h4>Model name</h4><input id="modelName" class="form-control" style="font-size: 18px" type="text" value="' + model.name + ' Copy"></input></div>');
+  modalHeaderContainer.append(originModelName);
+  modalHeaderContainer.append(newModelName);
+  modalHeader.append(modalHeaderContainer);
 
   var modalBody = $('<div class="modal-body" ></div>');
   
-  var divRowTable = $('<div class="row" style="height: 450px; overflow-y: auto"></div>');
+  var divRowTable = $('<div class="row" style="height: 350px; overflow-y: auto"></div>');
   divRowTable.append(tableContainer);
   
   var divRowReasonChange = $('<div class="row" style="margin-top: 10px"></div>');
-  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea class="form-control" id="reasonForChange" rows="3"></textarea></div></div>');
+  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea id="reasonChange" class="form-control" id="reasonForChange" rows="3"></textarea></div></div>');
   divRowReasonChange.append(reasonForChangeTextArea);
 
-  modalBody.append(divRowTable);
   modalBody.append(divRowReasonChange);
+  modalBody.append(divRowTable);
+  
+  var modalFooter = $('<div class="modal-footer"><button id="saveModelBtn" type="button" class="btn btn-default">Save</button>'+
+    '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>');
 
-  var modalFooter = $('<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>');
-
-  var modalContent = $('<div class="modal-content"></div>');
+  var modalContent = $('<div class="modal-content" style="padding: 15px"></div>');
   modalContent.append(modalHeader);
   modalContent.append(modalBody);
   modalContent.append(modalFooter);
 
-  var modalDialog = $('<div class="modal-dialog"></div>');
+  var modalDialog = $('<div class="modal-dialog modal-lg" ></div>');
   modalDialog.append(modalContent);
 
-  var modal = $('<div class="modal fade" id="' + dialogId + '" role="dialog"></div>');
+  var modal = $('<div class="modal fade" id="' + dialogId + '" role="dialog" ></div>');
   modal.append(modalDialog);
 
   // Removing cached data for the previous modal
@@ -221,6 +243,47 @@ function createDataModalForModels(model) {
   $('#editModelContainer').empty();
   $('#editModelContainer').append(modal);
 
+  //Making all the table cells with edit class editable
+  $('#editModelTable').editable({
+    selector: 'a',
+    mode: 'inline',
+  });
+ 
+  $('#saveModelBtn').click(function(e) {
+
+    console.log('Saving and closing ', dialogId);
+    saveModel();
+    $("#"+dialogId).modal('hide');
+    
+  });
+}
+
+function saveModel() {
+  var originModelName = $('#originModelName').val();
+  var modelName = $('#modelName').val();
+  var reasonChange = $('#reasonChange').val();
+
+  var values = new Array();
+  $('#editModelTable tr').each(function(){
+    var rowValue = new Array();
+    $(this).find('td').each(function(column, td) {
+      if (column != 1){
+        rowValue.push($(this).text())
+      } else {
+        rowValue.push($(this).find('a').text());
+      }  
+    });
+    values.push(rowValue);
+  });
+
+  var newModel = {
+    originName: originModelName,
+    name: modelName,
+    reason: reasonChange,
+    values: values 
+  }
+
+  console.log('New model', newModel);
 }
 
 function refreshBtnFn() {
@@ -324,15 +387,13 @@ function createErrorChart(model) {
     // The Error gauge
     $("#containers").append('<div id="' + model.name + '" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">' +
       '<div>' + model.name + ' error </div>' +
-      '<div style="border-radius: 50%; width: 100px; height: 100px; background-color:' + color + ';">' +
+      '<div data-toggle="modal" data-target="#' + model.name.trim() + 'Modal" style="cursor: hand; border-radius: 50%; width: 100px; height: 100px; background-color:' + color + ';">' +
       '<span style="position: relative; top: 37%;">' + model.error.toFixed(2) + "%" + '</span></div>' +
-      '<div><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#' + model.name.trim() + 'Modal">Click to Edit</button></div>' +
+      // '<div><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#' + model.name.trim() + 'Modal"><i class="fa fa-edit"></button></div>' +
       '</div>')
   }
 
 }
-
-
 
 var modelData = [];
 var salesData = [];

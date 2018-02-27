@@ -26,6 +26,11 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"
     />
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"
+    />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="css/forecast-poc-styles.css" />
 </head>
 
@@ -54,12 +59,12 @@
                     <select id="modelSelect" class="form-control mb-2 mr-sm-4 mb-sm-0" multiple="multiple"></select>
                     <!-- Refresh button -->
                     <div class="input-group-append">
-                            <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
-                                    <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
-                                </a>
+                        <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
+                            <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+                        </a>
                     </div>
                 </div>
-                
+
             </form>
 
         </nav>
@@ -116,7 +121,8 @@
 
             </form>
 
-        </div> <!-- End-Search Panel -->
+        </div>
+        <!-- End-Search Panel -->
 
     </div>
 
@@ -130,10 +136,9 @@
                 <div id="productImageCard" class="card hidden">
                     <h5 class="card-header">8M417</h5>
                     <div class="card-block">
-                            <img id="productImg" src="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf?$550x733_standard$&amp;$roundel_very$&amp;p1_img=curve" 
-                            data-pin-media="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf" 
-                            data-amp-zoom="{&quot;zoom&quot;:3,&quot;preload&quot;:false,&quot;target&quot;:&quot;.zoom-view&quot;,&quot;transforms&quot;:&quot;$1350x1800_standard$&quot;,&quot;activate&quot;:{&quot;touch&quot;:&quot;over&quot;,&quot;mouse&quot;:&quot;over&quot;}}" 
-                             style="height: auto; width: 100%; max-width: 100%;">    
+                        <img id="productImg" src="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf?$550x733_standard$&amp;$roundel_very$&amp;p1_img=curve"
+                            data-pin-media="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf" data-amp-zoom="{&quot;zoom&quot;:3,&quot;preload&quot;:false,&quot;target&quot;:&quot;.zoom-view&quot;,&quot;transforms&quot;:&quot;$1350x1800_standard$&quot;,&quot;activate&quot;:{&quot;touch&quot;:&quot;over&quot;,&quot;mouse&quot;:&quot;over&quot;}}"
+                            style="height: auto; width: 100%; max-width: 100%;">
                     </div>
                 </div>
             </div>
@@ -141,8 +146,8 @@
                 <div id="containers" class="col align-self-center" style="display: flex;" />
             </div>
         </div>
-    </div>   
-    
+    </div>
+
     <div id="editModelContainer" class="modal-container"></div>
 
 </body>
