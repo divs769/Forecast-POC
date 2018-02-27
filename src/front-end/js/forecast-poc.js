@@ -4,7 +4,7 @@ var series = [];
 $(document).ready(function () {
   // Initialize the model dropdown
   $('#modelSelect').multiselect({
-    includeSelectAllOption: true,
+    includeSelectAllOption: false,
     buttonWidth: '200px'
   });
 
@@ -81,6 +81,7 @@ $(document).ready(function () {
         markBestModel(series, availableModels)
 
         showModelSelectForm(true);
+        loadAndShowProductImg(searchByValue);
 
         refreshGraph(series);
       } else {
@@ -89,6 +90,10 @@ $(document).ready(function () {
 
     });
   });
+
+  function loadAndShowProductImg(product) {
+    $("#productImageCard").show();
+  }
 
   function updateModelSelect(models) {
     var options = [];

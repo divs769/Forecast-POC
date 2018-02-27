@@ -65,13 +65,14 @@
     left: 4px;
 }
 
-/* Fix for the bootstrap-multiselect options alignment*/
-.form-inline .multiselect-container label.checkbox,
-.form-inline .multiselect-container label.radio{
-    padding: 3px 20px 3px 40px;
+.hidden {
+    display: none;
 }
-.form-inline .multiselect-container li a label.checkbox input[type="checkbox"],
-.form-inline .multiselect-container li a label.radio input[type="radio"]{
-    margin-left: -20px;
-    margin-right: 0px;
-} 
+
+.bordered-container {
+    margin: 10px 10px 10px 10px;
+    border: 2px solid #e9e5e5;
+    padding: 10px 40px;
+    /* background: rgb(247, 243, 237); */
+    border-radius: 25px 25px 25px 25px;
+}
