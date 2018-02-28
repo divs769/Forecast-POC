@@ -1,5 +1,3 @@
-//TODO: x-editable store locally before saving in the database - http://vitalets.github.io/x-editable/docs.html#newrecord
-
 var chart;
 
 var series = [];
@@ -150,11 +148,7 @@ $(document).ready(function () {
 
   $('#searchTypeSelect').change(function () {
     var id = $(this).val()
-    /*if(hierarchyType != id){
-      $("#searchByInput").val("")
-    }*/
     hierarchyType = id
-    //$('#header-searchInput').attr('placeholder', "Enter the "+getHierarchyValue(id))
   });
 
   //Initialize the Weeks spinner
@@ -183,7 +177,7 @@ function createEditModelTable(model) {
   var tbody = $('<tbody></tbody>');
   for (var i = 0; i < model.values.length; i++) {
     var row = '<tr>';
-    row += "<td>" + Highcharts.dateFormat('%b %e %Y', model.values[i].x) + "</td>";
+    row += "<td>" + Highcharts.dateFormat('%d/%m/%Y', model.values[i].x) + "</td>";
     var editableValue = '<a href="#" id="value-'+model.values[i].y+'" data-type="number" data-url="/post" data-title="Enter value">' + model.values[i].y + '</a>'
     row += "<td class='edit'>" + editableValue + "</td>";
     row += '</tr>'
@@ -238,9 +232,6 @@ function createDataModalForModels(model) {
   var modal = $('<div class="modal fade" id="' + dialogId + '" role="dialog" ></div>');
   modal.append(modalDialog);
 
-  // Removing cached data for the previous modal
-  $('#' + dialogId).removeData('bs.modal');
-  $('#editModelContainer').empty();
   $('#editModelContainer').append(modal);
 
   //Making all the table cells with edit class editable
@@ -250,7 +241,6 @@ function createDataModalForModels(model) {
   });
  
   $('#saveModelBtn').click(function(e) {
-
     console.log('Saving and closing ', dialogId);
     saveModel();
     $("#"+dialogId).modal('hide');
@@ -258,32 +248,58 @@ function createDataModalForModels(model) {
   });
 }
 
+var hierarchyTypeEnums = { "lineNumber": "LINE_NUMBER", "product": "PRODUCT", "category": "CATEGORY" }
 function saveModel() {
   var originModelName = $('#originModelName').val();
   var modelName = $('#modelName').val();
   var reasonChange = $('#reasonChange').val();
+  var itemValue = $('#searchByInput').val();
 
   var values = new Array();
-  $('#editModelTable tr').each(function(){
-    var rowValue = new Array();
+  $('#editModelTable tbody tr').each(function(){
+    var rowValue = {};
     $(this).find('td').each(function(column, td) {
       if (column != 1){
-        rowValue.push($(this).text())
+        rowValue.date = $(this).text()
       } else {
-        rowValue.push($(this).find('a').text());
+        rowValue.stock = $(this).find('a').text();
       }  
     });
     values.push(rowValue);
   });
 
   var newModel = {
-    originName: originModelName,
+    id: null,
+    item: {
+        hierarchyType: hierarchyTypeEnums[$('#searchTypeSelect').val()],
+        item: itemValue
+    },
+    clonedModel: originModelName,
     name: modelName,
-    reason: reasonChange,
+    comment: reasonChange,
     values: values 
   }
-
   console.log('New model', newModel);
+
+  $.ajax({
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    crossDomain: true,
+    dataType: 'json',
+    type: 'post',
+    url: 'http://localhost:8080/model',
+    data: JSON.stringify(newModel),
+    success: function (data) {
+      console.log(data)
+    },
+    error: function (data) {
+      console.log(error);
+      alert("Error saving the new model");
+    }
+  });
+
 }
 
 function refreshBtnFn() {

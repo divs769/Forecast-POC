@@ -2,10 +2,13 @@ package com.shopdirect.forecastpoc.infrastructure.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.shopdirect.forecastpoc.infrastructure.json.CustomLocalDateDeserializer;
 
 import java.time.LocalDate;
 
 public class StockDataItem {
+    @JsonDeserialize(using = CustomLocalDateDeserializer.class)
     private LocalDate date;
     private long stock;
 

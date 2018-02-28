@@ -1,10 +1,12 @@
 package com.shopdirect.forecastpoc.infrastructure.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDate;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class CustomisedModel {
     private long id;
@@ -15,7 +17,7 @@ public class CustomisedModel {
     private String comment;
 
     @JsonCreator
-    public CustomisedModel(@JsonProperty("id") long id,
+    public CustomisedModel(@JsonProperty("id") @JsonInclude(NON_NULL) long id,
                             @JsonProperty("name") String name,
                            @JsonProperty("cloneModel") String clonedModel,
                            @JsonProperty("item") HierarchyItem item,

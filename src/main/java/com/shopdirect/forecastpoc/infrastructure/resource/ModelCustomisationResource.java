@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8000")
 @RequestMapping("/model")
 public class ModelCustomisationResource {
 
@@ -24,7 +24,7 @@ public class ModelCustomisationResource {
         this.customiseModelsService = customiseModelsService;
     }
 
-    @RequestMapping(method = POST)
+    @RequestMapping(method = POST, consumes = "application/json")
     public ResponseEntity<String> saveCustomisedData(@RequestBody CustomisedModel data) {
         try {
             Long id = customiseModelsService.saveModel(data);
