@@ -26,7 +26,7 @@ public class PostCustomisedDataStepsDef extends BaseForecastingStepDef {
 
     private CustomisedModelsDao customisedModelsDao;
     private AddCustomisedModelRequest request;
-    private static final String CUSTOMISATION_ENDPOINT = BASE_ENDPOINT+"/modelCustomisation";
+    private static final String CUSTOMISATION_ENDPOINT = BASE_ENDPOINT+"/model";
 
     @Autowired
     public PostCustomisedDataStepsDef(RestTemplate restTemplate, LatestResponse latestResponse,
@@ -35,6 +35,7 @@ public class PostCustomisedDataStepsDef extends BaseForecastingStepDef {
         super(restTemplate, latestResponse, db);
         this.customisedModelsDao = customisedModelsDao;
     }
+
     @Given("^there is no customised model inserted for hierarchy \"([^\"]*)\" and value \"([^\"]*)\"$")
     public void thereIsNoCustomisedModelInsertedForHierarchyAndValue(String hierarchyType, String value) throws Throwable {
         assertEquals(0, customisedModelsDao.getCustomisedModels(

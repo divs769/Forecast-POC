@@ -14,7 +14,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/modelCustomisation")
+@RequestMapping("/model")
 public class ModelCustomisationResource {
 
     private final CustomiseModelsService customiseModelsService;
