@@ -3,7 +3,7 @@
 <head>
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="js/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
     <script src="https://code.highcharts.com/modules/series-label.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -26,11 +26,16 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"
     />
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"
+    />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="css/forecast-poc-styles.css" />
 </head>
 
 <body>
-    <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" />
+    <!-- <img class="background-img" width="300px" heigth="300px" src="img/forecasting.png" /> -->
     <div class="pos-f-t">
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <a class="navbar-brand" href="#">
@@ -39,30 +44,33 @@
                     <b>Forecasting Tool</b>
                 </span>
             </a>
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav ml-auto" style="text-align: right">
                 <a class="btn btn-primary" data-toggle="collapse" href="#searchCollapse" role="button" aria-expanded="false" aria-controls="searchCollapse">
-                    <i class="fa fa-search fa-2x" style="color:Yellow" aria-hidden="true"></i>
+                    <i class="fa fa-search-minus fa-2x" style="color:Yellow" aria-hidden="true"></i>
                 </a>
             </ul>
             <!-- Models multiselect -->
-            <form id="modelSelectForm" class="form-inline my-2 my-lg-0">
-                <div class="input-group mb-2 mr-sm-2 mb-sm-0">
-                    <div class="input-group-addon">
+            <form id="modelSelectForm" class="form my-2 my-lg-0">
+                <!-- Models dropdown -->
+                <div class="input-group">
+                    <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">Models</span>
                     </div>
-                    <select id="modelSelect" class="form-control" multiple="multiple"></select>
+                    <select id="modelSelect" class="form-control mb-2 mr-sm-4 mb-sm-0" multiple="multiple"></select>
+                    <!-- Refresh button -->
+                    <div class="input-group-append">
+                        <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
+                            <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Refresh button -->
-                <a id="refreshBtn" class="btn btn-primary btn-md" style="margin-left: 10px" href="#">
-                    <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
-                </a>
             </form>
 
         </nav>
 
         <!-- Search Panel -->
-        <div class="collapse" id="searchCollapse">
+        <div class="collapse show" id="searchCollapse">
             <form class="form-inline search-form">
 
                 <!-- Hierarchy Dropdown-->
@@ -79,7 +87,7 @@
 
                 <!-- Search input -->
                 <label class="sr-only" for="inlineFormInputGroup">Search by</label>
-                <input type="text" class="form-control mb-2 mr-sm-4 mb-sm-0" id="searchByInput" placeholder="Search value">
+                <input type="text" class="form-control mb-2 mr-sm-4 mb-sm-0" id="searchByInput" placeholder="Search value" value="8M417">
 
                 <!-- Start date input -->
                 <div class="input-group date">
@@ -113,7 +121,8 @@
 
             </form>
 
-        </div> <!-- End-Search Panel -->
+        </div>
+        <!-- End-Search Panel -->
 
     </div>
 
@@ -121,6 +130,24 @@
     <div id="container"></div>
 
     <!-- Error charts -->
-    <div id="containers" class="col align-self-center" style="display: flex;" />
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2" style="padding: 15px">
+                <div id="productImageCard" class="card hidden">
+                    <h5 class="card-header">8M417</h5>
+                    <div class="card-block">
+                        <img id="productImg" src="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf?$550x733_standard$&amp;$roundel_very$&amp;p1_img=curve"
+                            data-pin-media="https://media.very.co.uk/i/very/8M417_SQ1_0000000004_BLACK_MDf" data-amp-zoom="{&quot;zoom&quot;:3,&quot;preload&quot;:false,&quot;target&quot;:&quot;.zoom-view&quot;,&quot;transforms&quot;:&quot;$1350x1800_standard$&quot;,&quot;activate&quot;:{&quot;touch&quot;:&quot;over&quot;,&quot;mouse&quot;:&quot;over&quot;}}"
+                            style="height: auto; width: 100%; max-width: 100%;">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-10">
+                <div id="containers" class="col align-self-center" style="display: flex;" />
+            </div>
+        </div>
+    </div>
+
+    <div id="editModelContainer" class="modal-container"></div>
 
 </body>

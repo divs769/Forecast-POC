@@ -64,3 +64,28 @@
     top: 0;
     left: 4px;
 }
+
+.hidden {
+    display: none;
+}
+
+.bordered-container {
+    margin: 10px 10px 10px 10px;
+    border: 2px solid #e9e5e5;
+    padding: 10px 40px;
+    /* background: rgb(247, 243, 237); */
+    border-radius: 25px 25px 25px 25px;
+}
+
+.close{
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    margin-top: -2px;
+    -webkit-appearance: none;
+}
