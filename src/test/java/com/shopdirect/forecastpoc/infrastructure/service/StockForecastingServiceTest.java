@@ -74,29 +74,44 @@ public class StockForecastingServiceTest {
                 new StockDataItem(initialDate.plusDays(42), 50),
                 new StockDataItem(initialDate.plusDays(49), 55),
                 new StockDataItem(initialDate.plusDays(56), 60));
-        expectedResults.add(new ForecastingModelResult(Arrays.asList(
-                models.get(1).getForecastedValues().get(0),
-                models.get(1).getForecastedValues().get(1),
-                models.get(1).getForecastedValues().get(2),
-                models.get(1).getForecastedValues().get(3),
-                naiveForecastings.get(4)
-        ), null, "Customised 2"));
+        expectedResults.add(new CustomisedModelResult(models.get(1).getId(),
+                Arrays.asList(
+                    models.get(1).getForecastedValues().get(0),
+                    models.get(1).getForecastedValues().get(1),
+                    models.get(1).getForecastedValues().get(2),
+                    models.get(1).getForecastedValues().get(3),
+                    naiveForecastings.get(4)),
+                null, "Customised 2", models.get(1).getClonedModel()));
         expectedResults.add(new ForecastingModelResult(naiveForecastings, 15.607, "naive"));
-        expectedResults.add(new ForecastingModelResult(Arrays.asList(
-                models.get(2).getForecastedValues().get(0),
-                averageForecastings.get(1),
-                averageForecastings.get(2),
-                averageForecastings.get(3),
-                averageForecastings.get(4)), null, "Customised 3"));
+        expectedResults.add(new CustomisedModelResult(models.get(2).getId(),
+                Arrays.asList(
+                    models.get(2).getForecastedValues().get(0),
+                    averageForecastings.get(1),
+                    averageForecastings.get(2),
+                    averageForecastings.get(3),
+                    averageForecastings.get(4)),
+                null, "Customised 3", models.get(2).getClonedModel()));
         expectedResults.add(new ForecastingModelResult(averageForecastings, 49.219, "average"));
-        expectedResults.add(new ForecastingModelResult(Arrays.asList(
-                models.get(0).getForecastedValues().get(0),
-                models.get(0).getForecastedValues().get(1),
-                models.get(0).getForecastedValues().get(2),
-                naiveForecastings.get(3),
-                naiveForecastings.get(4)), null, "Customised 1"));
+        expectedResults.add(new CustomisedModelResult(models.get(0).getId()
+                ,Arrays.asList(
+                    models.get(0).getForecastedValues().get(0),
+                    models.get(0).getForecastedValues().get(1),
+                    models.get(0).getForecastedValues().get(2),
+                    naiveForecastings.get(3),
+                    naiveForecastings.get(4)),
+                null, "Customised 1", models.get(0).getClonedModel()
+                ));
         for(int i = 0; i < results.size(); i++){
-           compareForecastingResultIgnoringError(expectedResults.get(i), results.get(i));
+           ForecastingModelResult expectedResult = expectedResults.get(i);
+           ForecastingModelResult actualResult = expectedResults.get(i);
+           compareForecastingResultIgnoringError(expectedResult, actualResult);
+           if(expectedResult instanceof CustomisedModelResult){
+               CustomisedModelResult expectedCustomisedResult = (CustomisedModelResult) expectedResult;
+               CustomisedModelResult actualCustomisedResult = (CustomisedModelResult) actualResult;
+               assertEquals(expectedCustomisedResult.getId(), actualCustomisedResult.getId());
+               assertEquals(expectedCustomisedResult.getClonedModel(), actualCustomisedResult.getClonedModel());
+           }
+
         }
 
     }
