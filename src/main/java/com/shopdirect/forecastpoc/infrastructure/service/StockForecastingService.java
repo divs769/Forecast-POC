@@ -127,7 +127,9 @@ public class StockForecastingService {
         Stream<StockDataItem> pastItems = allCustomisedForecastedValues
                 .stream().limit(forecastedValues.size() - numWeeks);
         Double error = calculateError(pastItems, actualValues);
-        return new CustomisedModelResult(customisedModel.getId(), allCustomisedForecastedValues, error, customisedModel.getName(), customisedModel.getClonedModel());
+        return new CustomisedModelResult(customisedModel.getId(),
+                allCustomisedForecastedValues, error, customisedModel.getName(),
+                customisedModel.getClonedModel(), customisedModel.getComment());
     }
 
     private List<StockDataItem> getProductStockData(ProductHierarchy type, String hierarchyValue) {

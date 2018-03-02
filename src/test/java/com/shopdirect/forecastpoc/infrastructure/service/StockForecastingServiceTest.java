@@ -81,7 +81,8 @@ public class StockForecastingServiceTest {
                     models.get(1).getForecastedValues().get(2),
                     models.get(1).getForecastedValues().get(3),
                     naiveForecastings.get(4)),
-                null, "Customised 2", models.get(1).getClonedModel()));
+                null, "Customised 2", models.get(1).getClonedModel(),
+                models.get(1).getComment()));
         expectedResults.add(new ForecastingModelResult(naiveForecastings, 15.607, "naive"));
         expectedResults.add(new CustomisedModelResult(models.get(2).getId(),
                 Arrays.asList(
@@ -90,7 +91,8 @@ public class StockForecastingServiceTest {
                     averageForecastings.get(2),
                     averageForecastings.get(3),
                     averageForecastings.get(4)),
-                null, "Customised 3", models.get(2).getClonedModel()));
+                null, "Customised 3", models.get(2).getClonedModel(),
+                models.get(2).getComment()));
         expectedResults.add(new ForecastingModelResult(averageForecastings, 49.219, "average"));
         expectedResults.add(new CustomisedModelResult(models.get(0).getId()
                 ,Arrays.asList(
@@ -99,7 +101,8 @@ public class StockForecastingServiceTest {
                     models.get(0).getForecastedValues().get(2),
                     naiveForecastings.get(3),
                     naiveForecastings.get(4)),
-                null, "Customised 1", models.get(0).getClonedModel()
+                null, "Customised 1", models.get(0).getClonedModel(),
+                models.get(0).getComment()
                 ));
         for(int i = 0; i < results.size(); i++){
            ForecastingModelResult expectedResult = expectedResults.get(i);
@@ -110,6 +113,7 @@ public class StockForecastingServiceTest {
                CustomisedModelResult actualCustomisedResult = (CustomisedModelResult) actualResult;
                assertEquals(expectedCustomisedResult.getId(), actualCustomisedResult.getId());
                assertEquals(expectedCustomisedResult.getClonedModel(), actualCustomisedResult.getClonedModel());
+               assertEquals(expectedCustomisedResult.getComment(), actualCustomisedResult.getComment());
            }
 
         }
