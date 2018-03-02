@@ -6,6 +6,9 @@ logging:
   file: build/app.log
   level: info
 
+server:
+  port: 5000
+
 springfox:
    documentation:
        swagger:

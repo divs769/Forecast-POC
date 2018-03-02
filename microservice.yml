@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: "AWS::Serverless-2016-10-31"
 Resources:
   forecastPocApplication:
     Type: AWS::ElasticBeanstalk::Application
@@ -33,13 +34,64 @@ Resources:
       TemplateName: !Ref forecastPocConfigurationTemplate
       VersionLabel: !Ref forecastPocApplicationVersion
 
-  forecastPocPolicy:
-    Type: AWS::IAM::Policy
+  HistoricStockLambda:
+    Type: "AWS::Serverless::Function"
     Properties:
-      Version: 2012-10-17
-      Statement:
-        Effect: Allow
-        Action:
-          - dynamodb:PutItem
-          - dynamodb:GetItem
-        Resource: !GetAtt
+      Handler: com.shopdirect.StockDataHandler
+      Runtime: java8
+      CodeUri: "s3://insert-stock-data/insert-stock-data-all.jar"
+      FunctionName: "insert-stock-data"
+      Events:
+        CSVFileUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref HistoricStockS3
+            Events: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "suffix"
+                    Value: "csv"
+      Timeout: 120
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            Effect: "Allow"
+            Action:
+              - "s3:GetObject"
+            Resource:
+              - "arn:aws:s3:::historic-stock-data"
+              - "arn:aws:s3:::historic-stock-data/*"
+        - Version: "2012-10-17"
+          Statement:
+            Effect: "Allow"
+            Action:
+              - "dynamodb:PutItem"
+            Resource: !GetAtt HistoricStockDynamoDB.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: "historic-stock-data"
+          TABLE_NAME: "forecast-stock"
+
+  HistoricStockS3:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "historic-stock-data"
+
+  HistoricStockDynamoDB:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "lineNumber"
+          AttributeType: "S"
+        - AttributeName: "date"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "lineNumber"
+          KeyType: "HASH"
+        - AttributeName: "date"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: "forecast-stock"

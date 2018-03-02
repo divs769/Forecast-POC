@@ -1,0 +1,11 @@
+Resources:
+  forecastPocPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Version: 2012-10-17
+      Statement:
+        Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: arn:aws:elasticbeanstalk:eu-west-1:167529333166:application/forecast-poc-forecastPocApplication-14GGTW5WY7J3
