@@ -190,6 +190,7 @@ function createEditModelTable(model) {
 }
 
 function createDataModalForModels(model) {
+  var clonedModel = model.clonedModel != undefined
   var dialogId = model.name + "Modal";
   var table = createEditModelTable(model);
 
@@ -198,10 +199,19 @@ function createDataModalForModels(model) {
 
   var modalHeader = $('<div class="modal-header"></div>');
   var modalHeaderContainer = $('<div class="container"></div>');
-  var originModelName = $('<div class="row"><h4>Origin</h4><input class="originModelName form-control" style="font-size: 18px" type="text" value="' + model.name + '" disabled></input></div>');
-  var newModelName = $('<div class="row"><h4>Model name</h4><input class="modelName form-control" style="font-size: 18px" type="text" value="' + model.name + ' Copy"></input></div>');
-  modalHeaderContainer.append(originModelName);
-  modalHeaderContainer.append(newModelName);
+  var originModelName = model.name
+  var newModelName = model.name + ' Copy'
+  var reasonForChange = ''
+  if(clonedModel){
+    originModelName = model.clonedModel
+    newModelName = model.name
+    reasonForChange = model.comment
+  }
+  var originModelNameDiv = $('<div class="row"><h4>Origin</h4><input class="originModelName form-control" style="font-size: 18px" type="text" value="' + originModelName + '" disabled></input></div>');
+  var newModelNameDiv = $('<div class="row"><h4>Model name</h4><input class="modelName form-control" style="font-size: 18px" type="text" value="' + newModelName + '"></input></div>');
+  modalHeaderContainer.append(originModelNameDiv);
+  modalHeaderContainer.append(newModelNameDiv);
+
   modalHeader.append(modalHeaderContainer);
 
   var modalBody = $('<div class="modal-body" ></div>');
@@ -210,15 +220,23 @@ function createDataModalForModels(model) {
   divRowTable.append(tableContainer);
   
   var divRowReasonChange = $('<div class="row" style="margin-top: 10px"></div>');
-  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea class="reasonChange form-control" id="reasonForChange" rows="3"></textarea></div></div>');
+  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea class="reasonChange form-control" id="reasonForChange" rows="3">'+reasonForChange+'</textarea></div></div>');
   divRowReasonChange.append(reasonForChangeTextArea);
 
   modalBody.append(divRowReasonChange);
   modalBody.append(divRowTable);
   
-  var modalFooter = $('<div class="modal-footer"><button type="button" class="btn btn-default saveModelBtn">Save</button>'+
-    '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>');
-
+  var modalFooter;
+  
+  var closeButton = '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>'
+  if(clonedModel){
+    var editButton = '<div class="modal-footer"><button type="button" class="btn btn-default editModelBtn" disabled>Edit</button>'
+    modalFooter = $(editButton+closeButton);
+  }else{
+    var saveButton = '<div class="modal-footer"><button type="button" class="btn btn-default saveModelBtn">Save</button>'
+    modalFooter = $(saveButton+closeButton);
+  }
+  
   var modalContent = $('<div class="modal-content" style="padding: 15px"></div>');
   modalContent.append(modalHeader);
   modalContent.append(modalBody);
@@ -445,7 +463,9 @@ function loadBackEndData(weeks, hierarchyValue, startDate, hierarchyType, callba
           modelData[i] = {
             id: i + 1, name: data.forecastings[i].name,
             error: data.forecastings[i].error,
-            values: forecastingList
+            values: forecastingList,
+            clonedModel: data.forecastings[i].clonedModel,
+            comment: data.forecastings[i].comment
           };
 
         }
