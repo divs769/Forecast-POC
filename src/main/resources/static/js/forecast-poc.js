@@ -183,11 +183,9 @@ function createEditModelTable(model) {
     row += '</tr>'
     tbody.append(row);
   }
-
-  var table = $('<table id="editModelTable" class="table"></table>');
+  var table = $('<table class="table editModelTable"></table>');
   table.append('<thead><tr><th>Date</th><th>Total Stock</th></tr></thead>');
   table.append(tbody);
-
   return table;
 }
 
@@ -200,8 +198,8 @@ function createDataModalForModels(model) {
 
   var modalHeader = $('<div class="modal-header"></div>');
   var modalHeaderContainer = $('<div class="container"></div>');
-  var originModelName = $('<div class="row"><h4>Origin</h4><input id="originModelName" class="form-control" style="font-size: 18px" type="text" value="' + model.name + '" disabled></input></div>');
-  var newModelName = $('<div class="row"><h4>Model name</h4><input id="modelName" class="form-control" style="font-size: 18px" type="text" value="' + model.name + ' Copy"></input></div>');
+  var originModelName = $('<div class="row"><h4>Origin</h4><input class="originModelName form-control" style="font-size: 18px" type="text" value="' + model.name + '" disabled></input></div>');
+  var newModelName = $('<div class="row"><h4>Model name</h4><input class="modelName form-control" style="font-size: 18px" type="text" value="' + model.name + ' Copy"></input></div>');
   modalHeaderContainer.append(originModelName);
   modalHeaderContainer.append(newModelName);
   modalHeader.append(modalHeaderContainer);
@@ -212,13 +210,13 @@ function createDataModalForModels(model) {
   divRowTable.append(tableContainer);
   
   var divRowReasonChange = $('<div class="row" style="margin-top: 10px"></div>');
-  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea id="reasonChange" class="form-control" id="reasonForChange" rows="3"></textarea></div></div>');
+  var reasonForChangeTextArea = $('<div class="card w-100"><div class="card-header">Reason for Change</div><div class="card-body"><textarea class="reasonChange form-control" id="reasonForChange" rows="3"></textarea></div></div>');
   divRowReasonChange.append(reasonForChangeTextArea);
 
   modalBody.append(divRowReasonChange);
   modalBody.append(divRowTable);
   
-  var modalFooter = $('<div class="modal-footer"><button id="saveModelBtn" type="button" class="btn btn-default">Save</button>'+
+  var modalFooter = $('<div class="modal-footer"><button type="button" class="btn btn-default saveModelBtn">Save</button>'+
     '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>');
 
   var modalContent = $('<div class="modal-content" style="padding: 15px"></div>');
@@ -235,28 +233,28 @@ function createDataModalForModels(model) {
   $('#editModelContainer').append(modal);
 
   //Making all the table cells with edit class editable
-  $('#editModelTable').editable({
+  $('.editModelTable').editable({
     selector: 'a',
     mode: 'inline',
   });
  
-  $('#saveModelBtn').click(function(e) {
+  $('.saveModelBtn').click(function(e) {
     console.log('Saving and closing ', dialogId);
-    saveModel();
+    saveModel(dialogId);
     $("#"+dialogId).modal('hide');
     
   });
 }
 
 var hierarchyTypeEnums = { "lineNumber": "LINE_NUMBER", "product": "PRODUCT", "category": "CATEGORY" }
-function saveModel() {
-  var originModelName = $('#originModelName').val();
-  var modelName = $('#modelName').val();
-  var reasonChange = $('#reasonChange').val();
+function saveModel(dialogId) {
+  var originModelName = $('#'+dialogId).find('.originModelName').val();//$('#originModelName').val();
+  var modelName = $('#'+dialogId).find('.modelName').val();//$('#modelName').val();
+  var reasonChange = $('#'+dialogId).find('.reasonChange').val();//$('#reasonChange').val();
   var itemValue = $('#searchByInput').val();
 
   var values = new Array();
-  $('#editModelTable tbody tr').each(function(){
+  $('#'+dialogId).find('.editModelTable tbody tr').each(function(){
     var rowValue = {};
     $(this).find('td').each(function(column, td) {
       if (column != 1){
