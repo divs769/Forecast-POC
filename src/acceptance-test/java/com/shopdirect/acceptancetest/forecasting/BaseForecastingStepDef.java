@@ -23,7 +23,7 @@ public abstract class BaseForecastingStepDef extends CucumberStepsDefinition {
 
     protected static final String BASE_ENDPOINT = "http://localhost:8080";
     protected static final String ENDPOINT = BASE_ENDPOINT+"/forecast";
-    protected static final String TABLE = "forecast_stock";
+    protected static final String TABLE = "forecast-stock";
 
     protected RestTemplate restTemplate;
     protected LatestResponse latestResponse;

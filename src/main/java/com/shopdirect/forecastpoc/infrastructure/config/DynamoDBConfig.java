@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class DynamoDBConfig {
 
-    public static final String TABLE = "forecast_stock";
+    public static final String TABLE = "forecast-stock";
 
     @Bean
     @Primary

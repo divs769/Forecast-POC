@@ -25,3 +25,9 @@ spring:
             INDENT_OUTPUT: true
 info:
     config: Development
+
+amazon:
+  dynamodb:
+    endpoint: dynamodb.eu-west-1.amazonaws.com
+    region: eu-west-1
+    tablePrefix:
