@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  forecastPocApplication:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      Description: Forecast POC backend application
+  forecastPocApplicationVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      ApplicationName: !Ref forecastPocApplication
+      Description: Forecast POC application version
+      SourceBundle:
+        S3Bucket: forecast-poc
+        S3Key: forecast-poc.jar
+  forecastPocConfigurationTemplate:
+    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
+    Properties:
+      ApplicationName: !Ref forecastPocApplication
+      Description: Forecast POC configuration template
+      OptionSettings:
+      - Namespace: aws:autoscaling:asg
+        OptionName: MaxSize
+        Value: '1'
+      - Namespace: aws:elasticbeanstalk:environment
+        OptionName: EnvironmentType
+        Value: SingleInstance
+      SolutionStackName: 64bit Amazon Linux 2017.09 v2.6.6 running Java 8
+  forecastPocApplicationEnvironment:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref forecastPocApplication
+      Description: AWS ElasticBeanstalk Forecast POC environment
+      TemplateName: !Ref forecastPocConfigurationTemplate
+      VersionLabel: !Ref forecastPocApplicationVersion
+
+  forecastPocPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Version: 2012-10-17
+      Statement:
+        Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: !GetAtt

@@ -19,7 +19,6 @@ endpoints:
   info:
     enabled: true
 
-
 spring:
     jackson:
         serialization:
