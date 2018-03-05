@@ -39,7 +39,7 @@ Resources:
     Properties:
       Handler: com.shopdirect.StockDataHandler
       Runtime: java8
-      CodeUri: "s3://insert-stock-data/insert-stock-data-all.jar"
+      CodeUri: "s3://insert-stock-data/insert-stock-data.jar"
       FunctionName: "insert-stock-data"
       Events:
         CSVFileUpload:
