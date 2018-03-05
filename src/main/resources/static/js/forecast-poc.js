@@ -1,5 +1,6 @@
 var chart;
-var endpoint = 'http://localhost:5000';
+var endpoint = 'http://fore-fore-1x6uuyrlvli7e.7fpq3x5t7a.eu-west-1.elasticbeanstalk.com/'
+//var endpoint='http://localhost:5000';
 var series = [];
 var markedModels = []
 var lastRefresh = []
