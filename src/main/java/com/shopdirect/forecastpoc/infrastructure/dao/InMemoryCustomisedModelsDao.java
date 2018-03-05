@@ -1,5 +1,6 @@
 package com.shopdirect.forecastpoc.infrastructure.dao;
 
+import com.shopdirect.forecastpoc.infrastructure.exceptions.ForecastingException;
 import com.shopdirect.forecastpoc.infrastructure.model.CustomisedModel;
 import com.shopdirect.forecastpoc.infrastructure.model.HierarchyItem;
 import com.shopdirect.forecastpoc.infrastructure.model.ProductHierarchy;
@@ -54,6 +55,12 @@ public class InMemoryCustomisedModelsDao implements CustomisedModelsDao {
         if(customisedModels == null){
             customisedModels = new ArrayList<>();
             models.put(key, customisedModels);
+        }else{
+            boolean nameExists = customisedModels.stream()
+                    .anyMatch(customisedModel -> customisedModel.getName().equals(model.getName()));
+            if(nameExists){
+                throw new ForecastingException("Element with this name already exists.");
+            }
         }
         model.setId(nextId);
         customisedModels.add(model);

@@ -1,6 +1,8 @@
 var chart;
 var endpoint = 'http://localhost:5000';
 var series = [];
+var markedModels = []
+var lastRefresh = []
 $(document).ready(function () {
   configureXEditable();
 
@@ -80,13 +82,19 @@ $(document).ready(function () {
         for (i = 0; i < sales.length; i++) {
           series.push({ name: sales[i].name, data: sales[i].values })
         }
-        markBestModel(series, availableModels)
-
+        if(markedModels.length == 0){
+          markBestModel(series, availableModels)
+        }else{
+          markedPreviouslyMarkedModels(series, availableModels)
+          markedModels = []
+        }
+        lastRefresh = getSelectedModels()
+        
         showModelSelectForm(true);
         loadAndShowProductImg(searchByValue);
 
+        createDataModals(lastRefresh)
         refreshGraph(series);
-        createDataModalForModels(availableModels[0]);
       } else {
         alert("Sorry, " + getHierarchyValue(hierarchyType) + " not found.")
       }
@@ -256,16 +264,21 @@ function createDataModalForModels(model) {
     mode: 'inline',
   });
  
-  $('.saveModelBtn').click(function(e) {
-    console.log('Saving and closing ', dialogId);
-    saveModel(dialogId);
-    $("#"+dialogId).modal('hide');
-    
+  $('#'+dialogId).find('.saveModelBtn').click(function(e) {
+    if($("#"+dialogId).is(':visible')){
+      console.log('Saving and closing ', dialogId);
+      saveModel(dialogId, function(){
+         $("#"+dialogId).modal('hide');
+        markedModels = lastRefresh
+        markedModels.push($('#'+dialogId).find('.modelName').val())
+        $('#searchBtn').click()
+      });
+    }
   });
 }
 
 var hierarchyTypeEnums = { "lineNumber": "LINE_NUMBER", "product": "PRODUCT", "category": "CATEGORY" }
-function saveModel(dialogId) {
+function saveModel(dialogId, callback) {
   var originModelName = $('#'+dialogId).find('.originModelName').val();//$('#originModelName').val();
   var modelName = $('#'+dialogId).find('.modelName').val();//$('#modelName').val();
   var reasonChange = $('#'+dialogId).find('.reasonChange').val();//$('#reasonChange').val();
@@ -309,8 +322,9 @@ function saveModel(dialogId) {
     data: JSON.stringify(newModel),
     success: function (data) {
       console.log(data)
+      callback();
     },
-    error: function (data) {
+    error: function (error) {
       console.log(error);
       alert("Error saving the new model");
     }
@@ -318,19 +332,45 @@ function saveModel(dialogId) {
 
 }
 
+function getSelectedModels(){
+  var selectedIds = [];
+  $('#modelSelect :selected').each(function (i, selectedElement) {
+    selectedIds.push($(selectedElement).val());
+  });
+  return selectedIds
+}
+
+function createDataModals(selectedIds){
+  $('#editModelContainer').children().each(function(i, elem){
+    elem.remove()
+  })
+  models = getModel(selectedIds);
+  for (i = 0; i < models.length; i++) {
+    createDataModalForModels(models[i]);
+  }
+}
+
 function refreshBtnFn() {
   $("#refreshBtn").click(function () {
-    var selectedIds = [];
-    $('#modelSelect :selected').each(function (i, selectedElement) {
-      selectedIds.push($(selectedElement).val());
-    });
-    models = getModel(selectedIds);
-    for (i = 0; i < models.length; i++) {
-      createDataModalForModels(models[i]);
-    }
+    var selectedIds = getSelectedModels()
+    lastRefresh = selectedIds
+    createDataModals(selectedIds)
     loadGraphData(series);
     refreshGraph(series);
   });
+}
+
+function markedPreviouslyMarkedModels(series, availableModelData) {
+  var modelsToMark = availableModelData.filter(model => markedModels.indexOf(model.name) !== -1)
+  for(let modelToMark of modelsToMark){
+    series.push({ name: modelToMark.name, data: modelToMark.values, error: modelToMark.error });
+  }
+   $("ul.multiselect-container > li > a > label.checkbox > input[type='checkbox']").each(function(i, elem){
+    if(markedModels.indexOf(elem.value) !== -1){
+      elem.click()
+    }
+  });
+
 }
 
 function markBestModel(series, availableModelaData) {
@@ -444,7 +484,7 @@ function loadBackEndData(weeks, hierarchyValue, startDate, hierarchyType, callba
       headers: {
         'X-Hello': 'World',
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Access-ContrloadBackEndDataol-Allow-Origin": "*"
       },
       type: 'GET',
       url: endpoint + '/forecast/' + weeks + '/' + hierarchyType + '/' + hierarchyValue + datePath,

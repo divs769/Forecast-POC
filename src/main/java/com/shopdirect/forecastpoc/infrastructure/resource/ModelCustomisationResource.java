@@ -1,5 +1,6 @@
 package com.shopdirect.forecastpoc.infrastructure.resource;
 
+import com.shopdirect.forecastpoc.infrastructure.exceptions.ForecastingException;
 import com.shopdirect.forecastpoc.infrastructure.model.CustomisedModel;
 import com.shopdirect.forecastpoc.infrastructure.service.CustomiseModelsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class ModelCustomisationResource {
         try {
             Long id = customiseModelsService.saveModel(data);
             return ResponseEntity.ok(id.toString());
+        }catch(ForecastingException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error!");
