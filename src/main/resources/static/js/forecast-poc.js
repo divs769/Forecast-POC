@@ -1,5 +1,5 @@
 var chart;
-
+var endpoint = 'http://localhost:5000';
 var series = [];
 $(document).ready(function () {
   configureXEditable();
@@ -305,7 +305,7 @@ function saveModel(dialogId) {
     crossDomain: true,
     dataType: 'json',
     type: 'post',
-    url: 'http://localhost:8080/model',
+    url: endpoint + '/model',
     data: JSON.stringify(newModel),
     success: function (data) {
       console.log(data)
@@ -447,7 +447,7 @@ function loadBackEndData(weeks, hierarchyValue, startDate, hierarchyType, callba
         "Access-Control-Allow-Origin": "*"
       },
       type: 'GET',
-      url: 'http://localhost:8080/forecast/' + weeks + '/' + hierarchyType + '/' + hierarchyValue + datePath,
+      url: endpoint + '/forecast/' + weeks + '/' + hierarchyType + '/' + hierarchyValue + datePath,
       success: function (data) {
         console.log(data)
         modelData.length = data.forecastings.length
