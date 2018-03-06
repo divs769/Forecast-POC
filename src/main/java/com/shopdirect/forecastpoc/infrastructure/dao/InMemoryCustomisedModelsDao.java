@@ -49,18 +49,45 @@ public class InMemoryCustomisedModelsDao implements CustomisedModelsDao {
     }
 
     @Override
-    public long saveCustomisedModel(CustomisedModel model) throws Exception {
+    public Optional<CustomisedModel> getCustomisedModel(long id) {
+        return models.values().stream().flatMap(item -> item.stream())
+                .filter(item -> item.getId() == id)
+                .findFirst();
+    }
+
+    @Override
+    public boolean nameExists(CustomisedModel model) {
+        String key = model.getItem().toString();
+        List<CustomisedModel> customisedModels = models.get(key);
+        if(customisedModels == null){
+            return false;
+        }else{
+            return customisedModels.stream()
+                    .anyMatch(customisedModel ->
+                            customisedModel.getId() != model.getId() &&
+                            customisedModel.getName().equals(model.getName()));
+        }
+    }
+
+    @Override
+    public void editCustomisedModel(CustomisedModel editedModel)  {
+        String key = editedModel.getItem().toString();
+        List<CustomisedModel> customisedModels = models.get(key);
+        CustomisedModel model = customisedModels.stream()
+                .filter(item -> item.getId() == editedModel.getId())
+                .findFirst().get();
+        model.setName(editedModel.getName());
+        model.setComment(editedModel.getComment());
+        model.setForecastedValues(editedModel.getForecastedValues());
+    }
+
+    @Override
+    public long saveCustomisedModel(CustomisedModel model) {
         String key = model.getItem().toString();
         List<CustomisedModel> customisedModels = models.get(key);
         if(customisedModels == null){
             customisedModels = new ArrayList<>();
             models.put(key, customisedModels);
-        }else{
-            boolean nameExists = customisedModels.stream()
-                    .anyMatch(customisedModel -> customisedModel.getName().equals(model.getName()));
-            if(nameExists){
-                throw new ForecastingException("Element with this name already exists.");
-            }
         }
         model.setId(nextId);
         customisedModels.add(model);

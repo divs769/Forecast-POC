@@ -58,4 +58,16 @@ public class CustomisedModel {
     public void setId(int id) {
         this.id = id;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setForecastedValues(List<StockDataItem> forecastedValues) {
+        this.forecastedValues = forecastedValues;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 }

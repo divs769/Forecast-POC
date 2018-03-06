@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8000")
+@CrossOrigin
 @RequestMapping("/model")
 public class ModelCustomisationResource {
 
@@ -30,6 +31,19 @@ public class ModelCustomisationResource {
         try {
             Long id = customiseModelsService.saveModel(data);
             return ResponseEntity.ok(id.toString());
+        }catch(ForecastingException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error!");
+        }
+    }
+
+    @RequestMapping(method = PUT, consumes = "application/json")
+    public ResponseEntity<String> editCustomisedData(@RequestBody CustomisedModel data) {
+        try {
+            customiseModelsService.editModel(data);
+            return ResponseEntity.ok(null);
         }catch(ForecastingException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {

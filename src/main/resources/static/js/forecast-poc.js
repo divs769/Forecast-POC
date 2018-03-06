@@ -1,6 +1,6 @@
 var chart;
-var endpoint = 'http://fore-fore-1x6uuyrlvli7e.7fpq3x5t7a.eu-west-1.elasticbeanstalk.com/'
-//var endpoint='http://localhost:5000';
+//var endpoint = 'http://fore-fore-1x6uuyrlvli7e.7fpq3x5t7a.eu-west-1.elasticbeanstalk.com/'
+var endpoint='http://localhost:5000';
 var series = [];
 var markedModels = []
 var lastRefresh = []
@@ -200,7 +200,7 @@ function createEditModelTable(model) {
 
 function createDataModalForModels(model) {
   var clonedModel = model.clonedModel != undefined
-  var dialogId = model.name + "Modal";
+  var dialogId = model.name.split(' ').join('_') + "Modal";
   var table = createEditModelTable(model);
 
   var tableContainer = $('<div class="table-responsive"></div>');
@@ -239,7 +239,7 @@ function createDataModalForModels(model) {
   
   var closeButton = '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button></div>'
   if(clonedModel){
-    var editButton = '<div class="modal-footer"><button type="button" class="btn btn-default editModelBtn" disabled>Edit</button>'
+    var editButton = '<div class="modal-footer"><button type="button" class="btn btn-default editModelBtn">Edit</button>'
     modalFooter = $(editButton+closeButton);
   }else{
     var saveButton = '<div class="modal-footer"><button type="button" class="btn btn-default saveModelBtn">Save</button>'
@@ -265,6 +265,24 @@ function createDataModalForModels(model) {
     mode: 'inline',
   });
  
+  $('#'+dialogId).find('.editModelBtn').click(function(e) {
+    if($("#"+dialogId).is(':visible')){
+      editModel(dialogId, model.id, function(){
+         $("#"+dialogId).modal('hide');
+         markedModels = lastRefresh
+         var newName = $('#'+dialogId).find('.modelName').val()
+         if(newName != model.name){
+          var index = markedModels.indexOf(model.name)
+          if(index != -1){
+            markedModels[i] = newName
+          }
+         }
+         $('#searchBtn').click()
+      });
+    }
+    
+  });
+
   $('#'+dialogId).find('.saveModelBtn').click(function(e) {
     if($("#"+dialogId).is(':visible')){
       console.log('Saving and closing ', dialogId);
@@ -278,8 +296,7 @@ function createDataModalForModels(model) {
   });
 }
 
-var hierarchyTypeEnums = { "lineNumber": "LINE_NUMBER", "product": "PRODUCT", "category": "CATEGORY" }
-function saveModel(dialogId, callback) {
+function createModel(dialogId, id){
   var originModelName = $('#'+dialogId).find('.originModelName').val();//$('#originModelName').val();
   var modelName = $('#'+dialogId).find('.modelName').val();//$('#modelName').val();
   var reasonChange = $('#'+dialogId).find('.reasonChange').val();//$('#reasonChange').val();
@@ -298,8 +315,8 @@ function saveModel(dialogId, callback) {
     values.push(rowValue);
   });
 
-  var newModel = {
-    id: null,
+  return {
+    id: id,
     item: {
         hierarchyType: hierarchyTypeEnums[$('#searchTypeSelect').val()],
         item: itemValue
@@ -309,9 +326,14 @@ function saveModel(dialogId, callback) {
     comment: reasonChange,
     values: values 
   }
+}
+
+var hierarchyTypeEnums = { "lineNumber": "LINE_NUMBER", "product": "PRODUCT", "category": "CATEGORY" }
+function saveModel(dialogId, callback) {
+  var newModel = createModel(dialogId)
   console.log('New model', newModel);
 
-  $.ajax({
+   $.ajax({
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -327,10 +349,33 @@ function saveModel(dialogId, callback) {
     },
     error: function (error) {
       console.log(error);
-      alert("Error saving the new model");
+      alert(error.responseText);
     }
   });
+}
 
+function editModel(dialogId, id, callback) {
+  var newModel = createModel(dialogId, id)
+  console.log('New model', newModel);
+
+   $.ajax({
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    crossDomain: true,
+    type: 'put',
+    url: endpoint + '/model',
+    data: JSON.stringify(newModel),
+    success: function (data) {
+      console.log(data)
+      callback();
+    },
+    error: function (error) {
+      console.log(error);
+      alert(error.responseText);
+    }
+  });
 }
 
 function getSelectedModels(){
@@ -457,10 +502,11 @@ function createErrorChart(model) {
     } else {
       color = '#f75454'; //red
     }
+    var modelNameWithoutSpaces = model.name.split(' ').join('_')
     // The Error gauge
-    $("#containers").append('<div id="' + model.name + '" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">' +
+    $("#containers").append('<div id="' + modelNameWithoutSpaces + '" style="padding-right: 40px; text-align:center; float: center; font-weight: bold;">' +
       '<div>' + model.name + ' error </div>' +
-      '<div data-toggle="modal" data-target="#' + model.name.trim() + 'Modal" style="cursor: hand; border-radius: 50%; width: 100px; height: 100px; background-color:' + color + ';">' +
+      '<div data-toggle="modal" data-target="#' + modelNameWithoutSpaces + 'Modal" style="cursor: hand; border-radius: 50%; width: 100px; height: 100px; background-color:' + color + ';">' +
       '<span style="position: relative; top: 37%;">' + model.error.toFixed(2) + "%" + '</span></div>' +
       // '<div><button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#' + model.name.trim() + 'Modal"><i class="fa fa-edit"></button></div>' +
       '</div>')
@@ -502,7 +548,8 @@ function loadBackEndData(weeks, hierarchyValue, startDate, hierarchyType, callba
             });
           }
           modelData[i] = {
-            id: i + 1, name: data.forecastings[i].name,
+            id: data.forecastings[i].id, 
+            name: data.forecastings[i].name,
             error: data.forecastings[i].error,
             values: forecastingList,
             clonedModel: data.forecastings[i].clonedModel,
